@@ -1,0 +1,3492 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncPL: Shared Trading P&L Dashboard</title>
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Sync with partners in real-time. Daily, weekly, monthly trading tracker, Discord chat, & voice. Year: 2026. Make: SyncPL. Model: Live-Dashboard. Type_Web-App.">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #060913;
+            color: #f3f4f6;
+        }
+        /* Scrollbar customization */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 99px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+        .discord-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        /* Voice Waveform Animation */
+        @keyframes voiceWave {
+            0%, 100% { height: 4px; }
+            50% { height: 16px; }
+        }
+        .voice-bar {
+            animation: voiceWave 0.8s ease-in-out infinite;
+        }
+        .voice-bar:nth-child(2) { animation-delay: 0.15s; }
+        .voice-bar:nth-child(3) { animation-delay: 0.3s; }
+        .voice-bar:nth-child(4) { animation-delay: 0.45s; }
+
+        /* Premium Visual Enhancements */
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .glass-card-hover {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-4px) scale(1.01);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 12px 40px -10px rgba(99, 102, 241, 0.2), 0 0 15px -3px rgba(99, 102, 241, 0.15);
+            background: rgba(17, 24, 39, 0.65);
+        }
+        /* Ambient Background Glows */
+        .ambient-glow-1 {
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+            pointer-events: none;
+        }
+        .ambient-glow-2 {
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, rgba(236, 72, 153, 0) 70%);
+            pointer-events: none;
+        }
+
+        /* Live Ticker Tape Animations */
+        @keyframes scrollTicker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .ticker-wrap {
+            overflow: hidden;
+            background: #03050a;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            white-space: nowrap;
+        }
+        .ticker-inner {
+            display: inline-block;
+            animation: scrollTicker 30s linear infinite;
+        }
+        .ticker-item {
+            display: inline-block;
+            padding: 0 2rem;
+            font-size: 11px;
+            font-weight: 700;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#060913',
+                        darkCard: '#0f1424',
+                        darkBorder: '#1c243c',
+                        discordBg: '#2f3136',
+                        discordSidebar: '#2f3136',
+                        discordChat: '#36393f',
+                        profit: '#10b981',
+                        loss: '#ef4444',
+                        accent: '#6366f1'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col antialiased relative overflow-hidden">
+
+<!-- Main Welcome / Join Room Onboarding Menu -->
+<div id="main-menu-overlay" class="hidden fixed inset-0 bg-[#060913] z-50 flex flex-col items-center justify-center p-4 overflow-y-auto">
+    <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full ambient-glow-1 z-0"></div>
+    <div class="absolute bottom-[-15%] left-[-10%] w-[60%] h-[60%] rounded-full ambient-glow-2 z-0"></div>
+    
+    <div class="glass-panel p-8 rounded-3xl max-w-md w-full relative z-10 space-y-6 text-center shadow-2xl border border-darkBorder animate-in fade-in zoom-in-95 duration-200">
+        <div class="flex flex-col items-center space-y-3">
+            <div class="p-4 bg-gradient-to-tr from-indigo-600 to-pink-500 rounded-2xl text-white shadow-xl shadow-indigo-600/20">
+                <i data-lucide="trending-up" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <h1 class="font-black text-3xl tracking-tight bg-gradient-to-r from-indigo-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">SyncPL</h1>
+                <p class="text-xs text-gray-400 font-bold tracking-wider uppercase mt-1">Institutional Trading Sync</p>
+            </div>
+        </div>
+
+        <p class="text-xs text-gray-400 leading-relaxed">
+            Welcome to SyncPL. Establish a secure workspace or synchronize portfolio metrics, daily, weekly, and monthly tracking with your trading partners in real-time.
+        </p>
+
+        <div class="space-y-4 pt-2">
+            <!-- Create Room Card Option -->
+            <button onclick="triggerMainMenuCreate()" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2 transition active:scale-[0.98]">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Create New Sync Room</span>
+            </button>
+
+            <div class="relative flex py-2 items-center">
+                <div class="flex-grow border-t border-darkBorder"></div>
+                <span class="flex-shrink mx-4 text-gray-500 text-xs font-bold uppercase tracking-wider">or join existing</span>
+                <div class="flex-grow border-t border-darkBorder"></div>
+            </div>
+
+            <!-- Join Room Form Option -->
+            <div class="space-y-2 text-left">
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Partner Room Code</label>
+                <div class="flex gap-2">
+                    <input type="text" id="menu-join-input" placeholder="PL-XXXX" class="bg-darkBg border border-darkBorder rounded-xl px-4 py-3 text-sm text-white uppercase font-bold tracking-widest focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-grow text-center font-mono">
+                    <button onclick="triggerMainMenuJoin()" class="bg-indigo-950 hover:bg-indigo-900 border border-indigo-500/30 text-indigo-400 font-bold text-sm px-6 rounded-xl transition active:scale-[0.95]">Join</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile configuration inside onboarding -->
+        <div class="pt-4 border-t border-darkBorder/30 text-left space-y-3">
+            <span class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center">Set Your Trader Identity</span>
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">Trader Nickname</label>
+                <input type="text" id="menu-username-input" class="w-full bg-darkBg border border-darkBorder rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold" value="Trader">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Live Price Ticker Header -->
+<div class="ticker-wrap w-full h-8 flex items-center shrink-0 select-none z-30">
+    <div class="ticker-inner text-gray-400 font-mono flex items-center" id="live-price-ticker-strip"></div>
+</div>
+
+<div id="app" class="flex-grow flex flex-col md:flex-row h-[calc(100vh-2rem)] overflow-hidden">
+
+    <!-- Loading Screen Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-darkBg z-50 flex flex-col items-center justify-center space-y-4">
+        <div class="relative">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500"></div>
+            <div class="absolute inset-0 m-auto h-8 w-8 rounded-full bg-indigo-500/20 animate-pulse"></div>
+        </div>
+        <p class="text-gray-300 font-semibold tracking-wider text-sm animate-pulse">Syncing high-fidelity trading modules...</p>
+    </div>
+
+    <!-- Sidebar / Navigation -->
+    <aside class="hidden md:flex w-full md:w-64 bg-darkCard/80 border-b md:border-b-0 md:border-r border-darkBorder/40 flex-col shrink-0 z-20 backdrop-blur-md">
+        <!-- Brand Header -->
+        <div class="p-5 border-b border-darkBorder/30 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="p-2.5 bg-gradient-to-tr from-indigo-600 to-pink-500 rounded-xl text-white shadow-lg shadow-indigo-600/30">
+                    <i data-lucide="trending-up" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-xl tracking-tight bg-gradient-to-r from-indigo-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">SyncPL</h1>
+                    <p class="text-[9px] text-gray-500 font-bold tracking-wider uppercase">Institutional Hub</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Profile Quick Card -->
+        <div class="p-4 border-b border-darkBorder/30 bg-darkBg/20 flex items-center space-x-3">
+            <div class="relative">
+                <div id="user-avatar" class="shrink-0"></div>
+                <span id="user-status-dot" class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-darkCard"></span>
+            </div>
+            <div class="flex-grow overflow-hidden">
+                <div class="flex items-center space-x-1">
+                    <span id="user-display-name" class="font-semibold text-sm text-gray-100 truncate">Trader</span>
+                    <button onclick="switchTab('partners')" class="text-gray-500 hover:text-white transition">
+                        <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+                <p id="user-status-text" class="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active Sync
+                </p>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="p-4 flex-grow space-y-1 overflow-y-auto">
+            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 bg-indigo-600/15 text-indigo-400 border border-indigo-500/10">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    <span>Dashboard</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-60"></i>
+            </button>
+
+            <button onclick="switchTab('chat')" id="btn-chat" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 text-gray-400 hover:bg-gray-800/40 hover:text-gray-200">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="message-square-code" class="w-4 h-4"></i>
+                    <span>Trading Desk & Voice</span>
+                </div>
+                <span id="chat-unread-badge" class="hidden text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full font-bold">NEW</span>
+            </button>
+
+            <button onclick="switchTab('leaderboard')" id="btn-leaderboard" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 text-gray-400 hover:bg-gray-800/40 hover:text-gray-200">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="trophy" class="w-4 h-4"></i>
+                    <span>Leaderboard</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-60"></i>
+            </button>
+
+            <button onclick="switchTab('logs')" id="btn-logs" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 text-gray-400 hover:bg-gray-800/40 hover:text-gray-200">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="history" class="w-4 h-4"></i>
+                    <span>Ledger Logs</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-60"></i>
+            </button>
+
+            <!-- Workspace Settings & Customizer Tab -->
+            <button onclick="switchTab('partners')" id="btn-partners" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 text-gray-400 hover:bg-gray-800/40 hover:text-gray-200">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+                    <span>Workspace Settings</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span id="admin-badge-nav" class="hidden text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-extrabold flex items-center gap-0.5">👑 Admin</span>
+                    <span id="group-member-count" class="text-[10px] bg-indigo-950 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-800/40">1</span>
+                </div>
+            </button>
+        </nav>
+
+        <!-- Log Trade Bottom Trigger -->
+        <div class="p-4 border-t border-darkBorder/30">
+            <button onclick="openLogModal()" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-sm py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2 transition active:scale-[0.98]">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Log New Trade</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-darkCard/95 border-t border-darkBorder/60 backdrop-blur-lg flex justify-around items-center h-16 z-30 px-2 pb-safe shadow-2xl">
+        <button onclick="switchTab('dashboard')" id="mobile-btn-dashboard" class="flex flex-col items-center justify-center flex-1 py-1 text-indigo-400">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+            <span class="text-[9px] mt-1 font-bold">Dashboard</span>
+        </button>
+        <button onclick="switchTab('chat')" id="mobile-btn-chat" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400">
+            <div class="relative">
+                <i data-lucide="message-square-code" class="w-5 h-5"></i>
+                <span id="mobile-chat-unread-badge" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse"></span>
+            </div>
+            <span class="text-[9px] mt-1 font-semibold">Chats</span>
+        </button>
+        <!-- Center Action Trigger: Quick Log Entry -->
+        <button onclick="openLogModal()" class="flex flex-col items-center justify-center -mt-6 bg-gradient-to-tr from-indigo-600 via-indigo-500 to-pink-500 text-white w-12 h-12 rounded-full shadow-lg shadow-indigo-600/40 border-4 border-darkBg shrink-0 transition active:scale-[0.92]">
+            <i data-lucide="plus" class="w-6 h-6"></i>
+        </button>
+        <button onclick="switchTab('leaderboard')" id="mobile-btn-leaderboard" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400">
+            <i data-lucide="trophy" class="w-5 h-5"></i>
+            <span class="text-[9px] mt-1 font-semibold">Rankings</span>
+        </button>
+        <button onclick="switchTab('partners')" id="mobile-btn-partners" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+            <span class="text-[9px] mt-1 font-semibold">Settings</span>
+        </button>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow flex flex-col overflow-hidden bg-darkBg relative pb-16 md:pb-0">
+        
+        <!-- Glowing ambient backdrop meshes -->
+        <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full ambient-glow-1 z-0"></div>
+        <div class="absolute bottom-[-15%] left-[-10%] w-[60%] h-[60%] rounded-full ambient-glow-2 z-0"></div>
+
+        <!-- Global Header Bar -->
+        <header class="h-16 border-b border-darkBorder/30 bg-darkCard/30 backdrop-blur-md px-6 flex items-center justify-between shrink-0 z-10">
+            <div class="flex items-center space-x-4">
+                <h2 id="current-view-title" class="font-extrabold text-white text-md tracking-tight">Dashboard Overview</h2>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <div class="flex flex-col items-end text-right">
+                    <p class="text-[9px] uppercase text-gray-500 font-extrabold tracking-widest">Active Workspace Room</p>
+                    <p id="top-room-code" class="text-sm font-bold text-indigo-400 tracking-wider font-mono">CREATING...</p>
+                </div>
+                <button onclick="copyGroupCode()" class="bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-500/20 text-indigo-400 p-2.5 rounded-xl transition active:scale-[0.95]" title="Copy Room Invite Link">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                </button>
+                <button onclick="switchTab('partners')" class="bg-gray-800/30 hover:bg-gray-800/60 border border-gray-700/20 text-gray-300 p-2.5 rounded-xl transition active:scale-[0.95]" title="Workspace Setup & Channels">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-grow flex flex-col min-h-0 relative z-10 overflow-hidden">
+
+            <!-- TAB: DASHBOARD -->
+            <div id="view-dashboard" class="p-6 space-y-6 overflow-y-auto h-full text-gray-200">
+                <!-- Metrics Bar -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Stat Card 1 -->
+                    <div class="glass-panel glass-card-hover p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">Today's Profit</span>
+                            <span class="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl"><i data-lucide="calendar" class="w-4 h-4"></i></span>
+                        </div>
+                        <div>
+                            <p id="metric-daily-pnl" class="text-3xl font-black text-white tracking-tight">$0.00</p>
+                            <p id="metric-daily-sub" class="text-[10px] text-gray-500 font-medium mt-1">No logs today</p>
+                            <div class="w-full bg-gray-800/50 h-1 rounded-full mt-3 overflow-hidden">
+                                <div class="bg-emerald-400 h-full w-[60%] rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card 2 -->
+                    <div class="glass-panel glass-card-hover p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">This Week</span>
+                            <span class="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl"><i data-lucide="calendar-range" class="w-4 h-4"></i></span>
+                        </div>
+                        <div>
+                            <p id="metric-weekly-pnl" class="text-3xl font-black text-white tracking-tight">$0.00</p>
+                            <p id="metric-weekly-sub" class="text-[10px] text-gray-500 font-medium mt-1">Weekly total</p>
+                            <div class="w-full bg-gray-800/50 h-1 rounded-full mt-3 overflow-hidden">
+                                <div class="bg-indigo-400 h-full w-[45%] rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card 3 -->
+                    <div class="glass-panel glass-card-hover p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">This Month</span>
+                            <span class="p-2 bg-purple-500/10 text-purple-400 rounded-xl"><i data-lucide="calendar-days" class="w-4 h-4"></i></span>
+                        </div>
+                        <div>
+                            <p id="metric-monthly-pnl" class="text-3xl font-black text-white tracking-tight">$0.00</p>
+                            <p id="metric-monthly-sub" class="text-[10px] text-gray-500 font-medium mt-1">Monthly total</p>
+                            <div class="w-full bg-gray-800/50 h-1 rounded-full mt-3 overflow-hidden">
+                                <div class="bg-purple-400 h-full w-[75%] rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card 4 -->
+                    <div class="glass-panel glass-card-hover p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">Win Rate</span>
+                            <span class="p-2 bg-amber-500/10 text-amber-400 rounded-xl"><i data-lucide="percent" class="w-4 h-4"></i></span>
+                        </div>
+                        <div>
+                            <p id="metric-win-rate" class="text-3xl font-black text-white tracking-tight">0%</p>
+                            <p id="metric-trades-count" class="text-[10px] text-gray-500 font-medium mt-1">0 setups logged</p>
+                            <div class="w-full bg-gray-800/50 h-1 rounded-full mt-3 overflow-hidden">
+                                <div id="win-rate-bar" class="bg-amber-400 h-full w-[0%] rounded-full transition-all duration-500"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consistency Heatmap Calendar -->
+                <div class="glass-panel p-6 rounded-3xl relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                        <div>
+                            <h3 class="font-bold text-gray-100 text-lg flex items-center gap-2">
+                                <i data-lucide="calendar-heart" class="text-indigo-400 w-5 h-5"></i> Monthly P&L Consistency Calendar
+                            </h3>
+                            <p class="text-xs text-gray-400 mt-1">Visualizing win/loss habit chains. Profitable days are highlighted green, losses are highlighted red.</p>
+                        </div>
+                        <div class="flex items-center space-x-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 bg-darkBg/60 px-3 py-1.5 rounded-xl border border-darkBorder/40">
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-emerald-500/70"></span> Profit</div>
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-rose-500/70"></span> Loss</div>
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-gray-800"></span> Flat</div>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto pb-1.5">
+                        <div class="grid grid-cols-7 gap-2 text-center min-w-[500px]" id="heatmap-calendar-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Chart & Activity Panels -->
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <!-- Chart Panel Container -->
+                    <div class="glass-panel p-6 rounded-3xl xl:col-span-2 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+                            <div>
+                                <h3 class="font-bold text-gray-100 text-lg">Group Performance Curve</h3>
+                                <p class="text-xs text-gray-400 mt-1">Real-time cumulative ledger visualization of partners</p>
+                            </div>
+                            <div class="flex items-center space-x-2 bg-indigo-950/40 border border-indigo-500/20 px-3 py-1.5 rounded-xl">
+                                <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                                <span class="text-[10px] font-bold text-indigo-300 uppercase tracking-widest">Live Feed</span>
+                            </div>
+                        </div>
+                        <div class="relative min-h-[250px] md:min-h-[340px] flex items-center justify-center">
+                            <canvas id="pnlHistoryChart" class="w-full h-full"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Live Activity Feed Container -->
+                    <div class="glass-panel p-6 rounded-3xl flex flex-col h-full max-h-[500px]">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-bold text-gray-100 text-lg">Live Activity Feed</h3>
+                                <p class="text-xs text-gray-400">Instant synchronized logs from partners</p>
+                            </div>
+                            <span class="relative flex h-2.5 w-2.5">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                            </span>
+                        </div>
+                        <div class="flex-grow space-y-3 overflow-y-auto pr-1" id="activity-feed">
+                            <p class="text-sm text-gray-500 text-center py-8">Waiting for ledger sync entries...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: CHAT & VOICE -->
+            <div id="view-chat" class="hidden flex flex-col md:flex-row h-full w-full absolute inset-0 bg-gray-950">
+                <!-- Sidebar Panel: Dynamic Channel Navigation -->
+                <div id="chat-channel-sidebar" class="hidden md:flex w-full md:w-56 bg-gray-900 border-b md:border-b-0 md:border-r border-gray-800 flex-col shrink-0 text-gray-300">
+                    <div class="p-3 border-b border-gray-800 flex items-center justify-between">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Workspace Channels</span>
+                        <span class="text-[10px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold">LIVE</span>
+                    </div>
+                    
+                    <div class="p-2 flex-grow space-y-1 overflow-y-auto" id="dynamic-channels-list"></div>
+
+                    <!-- Connection Status Panel -->
+                    <div id="voice-connection-status" class="p-3 bg-gray-950 border-t border-gray-800 space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span id="voice-status-led" class="w-2.5 h-2.5 rounded-full bg-gray-600"></span>
+                                <span id="voice-status-msg" class="font-bold text-gray-400">Voice Off</span>
+                            </div>
+                            <button onclick="disconnectVoice()" id="voice-disconnect-btn" class="hidden text-rose-400 hover:text-rose-300 transition" title="Disconnect Voice Room">
+                                <i data-lucide="phone-off" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Speaking indicators list -->
+                        <div id="voice-connected-users" class="space-y-1.5 pt-1 max-h-24 overflow-y-auto font-mono"></div>
+
+                        <!-- Mic, speaker, and mock triggers -->
+                        <div class="flex items-center justify-around border-t border-gray-800 pt-2 text-gray-400">
+                            <button id="btn-toggle-mic" onclick="toggleMicrophone()" class="p-1 hover:bg-gray-800 rounded text-gray-200 transition" title="Mute Microphone">
+                                <i data-lucide="mic" class="w-4 h-4"></i>
+                            </button>
+                            <button id="btn-toggle-deafen" onclick="toggleDeafen()" class="p-1 hover:bg-gray-800 rounded text-gray-200 transition" title="Deafen Audio">
+                                <i data-lucide="volume-x" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="triggerVoiceSpeakSim()" class="p-1 hover:bg-gray-800 rounded text-indigo-400 transition" title="Simulate AI Advisor Conversation">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Middle Panel -->
+                <div class="flex-grow bg-gray-800 flex flex-col min-w-0">
+                    <div class="h-12 border-b border-gray-900 px-4 flex items-center justify-between shrink-0 bg-gray-900/60">
+                        <div class="flex items-center space-x-2">
+                            <button onclick="toggleMobileChannels()" class="md:hidden p-1.5 text-gray-400 hover:text-white mr-1 bg-gray-800/40 border border-gray-700/30 rounded-lg" title="Toggle Channel List">
+                                <i data-lucide="menu" class="w-4 h-4"></i>
+                            </button>
+                            <span class="text-gray-500 font-bold">#</span>
+                            <span id="active-chat-channel-title" class="font-bold text-white text-sm">general-trading</span>
+                        </div>
+                        <div class="text-xs text-gray-400 bg-gray-900 px-2 py-1 rounded-md" id="channel-type-badge">Text Channel</div>
+                    </div>
+
+                    <!-- Chat Message Stream -->
+                    <div id="chat-messages-container" class="flex-grow p-4 overflow-y-auto space-y-4 discord-scrollbar">
+                        <p class="text-xs text-gray-500 text-center py-12">Retrieving communication ledger...</p>
+                    </div>
+
+                    <!-- Input Box -->
+                    <div class="p-3 border-t border-gray-900 shrink-0 bg-gray-900/40">
+                        <form onsubmit="handleChatSubmit(event)" class="flex gap-2">
+                            <input type="text" id="chat-message-input" autocomplete="off" placeholder="Send secure sync packet..." class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm px-4 rounded-xl transition flex items-center gap-1.5 shrink-0">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Chat Right Panel: Active Members -->
+                <div class="hidden lg:flex w-48 bg-gray-900 border-l border-gray-800 flex-col shrink-0 text-gray-300">
+                    <div class="p-3 border-b border-gray-800">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Online Partners</span>
+                    </div>
+                    <div class="p-3 space-y-3 overflow-y-auto flex-grow" id="chat-partners-list"></div>
+                </div>
+            </div>
+
+            <!-- TAB: LEADERBOARD -->
+            <div id="view-leaderboard" class="hidden p-6 space-y-6 overflow-y-auto h-full">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                        <h3 class="font-black text-2xl text-white tracking-tight">Partner Performance Board</h3>
+                        <p class="text-xs text-gray-400 mt-1">Real-time stats ranking inside the active sync group</p>
+                    </div>
+
+                    <div class="flex bg-darkCard/50 border border-darkBorder/30 p-1 rounded-2xl backdrop-blur-md">
+                        <button onclick="setLeaderboardPeriod('daily')" id="lbl-daily" class="lbl-tab px-5 py-2 rounded-xl text-xs font-bold transition bg-indigo-600/15 text-indigo-400">Daily</button>
+                        <button onclick="setLeaderboardPeriod('weekly')" id="lbl-weekly" class="lbl-tab px-5 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition">Weekly</button>
+                        <button onclick="setLeaderboardPeriod('monthly')" id="lbl-monthly" class="lbl-tab px-5 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition">Monthly</button>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-3xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-darkBorder/40">
+                            <thead>
+                                <tr class="bg-gray-900/40 text-left text-xs font-extrabold text-gray-400 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-4">Rank</th>
+                                    <th scope="col" class="px-6 py-4">Trader Details</th>
+                                    <th scope="col" class="px-6 py-4 text-center">Trades Logged</th>
+                                    <th scope="col" class="px-6 py-4 text-center">Win Rate</th>
+                                    <th scope="col" class="px-6 py-4 text-right">Aggregate P&L</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-table-body" class="divide-y divide-darkBorder/30"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: LOGS -->
+            <div id="view-logs" class="hidden p-6 space-y-6 overflow-y-auto h-full">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="font-black text-2xl text-white tracking-tight">Ledger Logs</h3>
+                        <p class="text-xs text-gray-400 mt-1">Comprehensive ledger list of active group</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="exportLedgerToCSV()" class="bg-indigo-950/40 hover:bg-indigo-900 border border-indigo-500/20 text-indigo-400 font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-2" title="Export synchronized ledger logs to CSV">
+                            <i data-lucide="download" class="w-4 h-4"></i> Export CSV
+                        </button>
+                        <button onclick="openLogModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add Record
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Panel -->
+                <div class="glass-panel p-4 rounded-2xl flex gap-4 items-center flex-wrap">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        <i data-lucide="filter" class="w-4 h-4 text-indigo-400"></i>
+                        <span>Filter Scope:</span>
+                    </div>
+                    <button onclick="setLogScope('all')" id="log-scope-all" class="log-scope-btn bg-indigo-600/15 text-indigo-400 px-4 py-1.5 rounded-xl text-xs font-bold transition">Group Entries</button>
+                    <button onclick="setLogScope('me')" id="log-scope-me" class="log-scope-btn text-gray-400 hover:text-white px-4 py-1.5 rounded-xl text-xs font-bold transition">Only Me</button>
+                </div>
+
+                <!-- Table Grid -->
+                <div class="glass-panel rounded-3xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-darkBorder/40">
+                            <thead class="bg-darkBg/50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Date</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Trader</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Asset</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Notes / Strategy</th>
+                                    <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">P&L Status</th>
+                                    <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-table-body" class="divide-y divide-darkBorder/30"></tbody>
+                        </table>
+                    </div>
+                    <div id="logs-empty-state" class="hidden p-12 text-center text-gray-500">
+                        <i data-lucide="folder-open" class="w-12 h-12 mx-auto text-gray-600 mb-2"></i>
+                        <p class="text-sm font-semibold">No P&L sync records found.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: WORKSPACE & CHAT SYSTEM SETTINGS -->
+            <div id="view-partners" class="hidden p-6 space-y-6 overflow-y-auto h-full text-gray-200">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-black text-2xl text-white tracking-tight">Workspace Configuration Hub</h3>
+                        <p class="text-xs text-gray-400 mt-1">Fine-tune trading channels, customize profile tags, and configure the voice synthesis co-pilot.</p>
+                    </div>
+                    <div id="settings-admin-header" class="hidden bg-amber-500/10 border border-amber-500/20 text-amber-400 px-4 py-2.5 rounded-xl flex items-center gap-2 self-start md:self-auto shadow-md shadow-amber-500/5 font-mono">
+                        <i data-lucide="crown" class="w-4 h-4"></i>
+                        <span class="text-xs font-extrabold uppercase tracking-wider font-sans">Workspace Administrator Console</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Column 1: Profile & Room Sync -->
+                    <div class="space-y-6">
+                        <!-- Profile Card -->
+                        <div class="glass-panel p-5 rounded-2xl space-y-4">
+                            <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
+                                <i data-lucide="user" class="text-indigo-400 w-4.5 h-4.5"></i> Sync Profile Settings
+                            </h4>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">Display Name</label>
+                                <input type="text" id="settings-username-input" max="18" placeholder="Trader Alias" class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">Select Profile Icon Color</label>
+                                <div class="grid grid-cols-5 gap-2" id="profile-color-selector">
+                                    <button onclick="setAvatarColor('indigo')" class="w-8 h-8 rounded-full bg-indigo-600 border-2 border-transparent ring-offset-2 ring-offset-darkCard" id="col-indigo"></button>
+                                    <button onclick="setAvatarColor('pink')" class="w-8 h-8 rounded-full bg-pink-500 border-2 border-transparent" id="col-pink"></button>
+                                    <button onclick="setAvatarColor('emerald')" class="w-8 h-8 rounded-full bg-emerald-500 border-2 border-transparent" id="col-emerald"></button>
+                                    <button onclick="setAvatarColor('amber')" class="w-8 h-8 rounded-full bg-amber-500 border-2 border-transparent" id="col-amber"></button>
+                                    <button onclick="setAvatarColor('sky')" class="w-8 h-8 rounded-full bg-sky-400 border-2 border-transparent" id="col-sky"></button>
+                                </div>
+                            </div>
+
+                            <!-- Profile Picture Customizer -->
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Profile Avatar Type</label>
+                                <div class="flex rounded-xl overflow-hidden border border-darkBorder/60">
+                                    <button type="button" id="pfp-type-emoji" onclick="setAvatarType('emoji')" class="flex-grow py-2 bg-indigo-950/40 text-indigo-400 text-xs font-extrabold border-r border-darkBorder/60 transition duration-150">
+                                        EMOJI ICON
+                                    </button>
+                                    <button type="button" id="pfp-type-url" onclick="setAvatarType('url')" class="flex-grow py-2 bg-darkBg text-gray-500 text-xs font-semibold transition duration-150">
+                                        IMAGE URL
+                                    </button>
+                                </div>
+                                
+                                <!-- Emoji preset selector -->
+                                <div id="pfp-emoji-picker-row" class="space-y-1.5">
+                                    <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-widest">Preset Trading Icon</label>
+                                    <div class="grid grid-cols-5 gap-1.5" id="pfp-emoji-selector">
+                                        <button onclick="setAvatarVal('🐂')" class="pfp-emoji-btn p-2 bg-darkBg border border-darkBorder/60 hover:border-indigo-500 rounded-xl text-lg text-center transition duration-150" id="em-bull">🐂</button>
+                                        <button onclick="setAvatarVal('🐻')" class="pfp-emoji-btn p-2 bg-darkBg border border-darkBorder/60 hover:border-indigo-500 rounded-xl text-lg text-center transition duration-150" id="em-bear">🐻</button>
+                                        <button onclick="setAvatarVal('🐳')" class="pfp-emoji-btn p-2 bg-darkBg border border-darkBorder/60 hover:border-indigo-500 rounded-xl text-lg text-center transition duration-150" id="em-whale">🐳</button>
+                                        <button onclick="setAvatarVal('🚀')" class="pfp-emoji-btn p-2 bg-darkBg border border-darkBorder/60 hover:border-indigo-500 rounded-xl text-lg text-center transition duration-150" id="em-rocket">🚀</button>
+                                        <button onclick="setAvatarVal('📈')" class="pfp-emoji-btn p-2 bg-darkBg border border-darkBorder/60 hover:border-indigo-500 rounded-xl text-lg text-center transition duration-150" id="em-chart">📈</button>
+                                        <button onclick="setAvatarVal('💰')" class="pfp-emoji-btn p-2 bg-darkBg border border-darkBorder/60 hover:border-indigo-500 rounded-xl text-lg text-center transition duration-150" id="em-bag">💰</button>
+                                        <button onclick="setAvatarVal('⚡')" class="pfp-emoji-btn p-2 bg-darkBg border border-darkBorder/60 hover:border-indigo-500 rounded-xl text-lg text-center transition duration-150" id="em-speed">⚡</button>
+                                        <button onclick="setAvatarVal('🧠')" class="pfp-emoji-btn p-2 bg-darkBg border border-darkBorder/60 hover:border-indigo-500 rounded-xl text-lg text-center transition duration-150" id="em-brain">🧠</button>
+                                        <button onclick="setAvatarVal('👑')" class="pfp-emoji-btn p-2 bg-darkBg border border-darkBorder/60 hover:border-indigo-500 rounded-xl text-lg text-center transition duration-150" id="em-crown">👑</button>
+                                        <button onclick="setAvatarVal('🎯')" class="pfp-emoji-btn p-2 bg-darkBg border border-darkBorder/60 hover:border-indigo-500 rounded-xl text-lg text-center transition duration-150" id="em-target">🎯</button>
+                                    </div>
+                                </div>
+
+                                <!-- Custom url customizer input -->
+                                <div id="pfp-url-picker-row" class="hidden space-y-1">
+                                    <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-widest">PFP Image Address Link</label>
+                                    <input type="url" id="pfp-custom-url-input" oninput="setAvatarValFromUrlInput()" placeholder="https://example.com/avatar.png" class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
+                                </div>
+                            </div>
+
+                            <button onclick="saveWorkspaceProfile()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-3 px-4 rounded-xl transition duration-150 shadow-md">
+                                Apply Changes
+                            </button>
+                        </div>
+
+                        <!-- Room Sync Connection -->
+                        <div class="glass-panel p-5 rounded-2xl space-y-4">
+                            <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
+                                <i data-lucide="globe" class="text-indigo-400 w-4.5 h-4.5"></i> Room Integration
+                            </h4>
+                            <div class="bg-darkBg/60 p-3 rounded-xl border border-darkBorder/40">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Current Shared Room Code</span>
+                                <div class="flex items-center justify-between mt-1 font-mono">
+                                    <span id="settings-room-code" class="font-black text-indigo-400 tracking-wider text-base">CREATING...</span>
+                                    <button onclick="copyGroupCode()" class="text-indigo-400 hover:text-indigo-300 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">Enter Partner Room Code</label>
+                                <div class="flex gap-2 font-mono">
+                                    <input type="text" id="join-group-input" placeholder="PL-XXXX" class="bg-darkBg border border-darkBorder/60 rounded-xl px-3 py-2 text-sm text-white uppercase font-bold tracking-wider focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-grow font-mono">
+                                    <button onclick="triggerJoinGroup()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-4 rounded-xl transition font-sans">Join</button>
+                                </div>
+                            </div>
+                            <button onclick="triggerCreateGroup()" class="w-full bg-darkBg border border-indigo-900/40 hover:border-indigo-800 text-indigo-400 font-bold text-xs py-3 px-4 rounded-xl transition">
+                                Create New Room Code
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Channels Management -->
+                    <div class="space-y-6">
+                        <!-- Create New Channels Form -->
+                        <div class="glass-panel p-5 rounded-2xl space-y-4 relative overflow-hidden">
+                            <div id="channel-create-lock-overlay" class="hidden absolute inset-0 bg-darkCard/90 backdrop-blur-[3px] z-20 flex flex-col items-center justify-center text-center p-6">
+                                <div class="p-3 bg-gray-800/80 text-gray-400 rounded-2xl border border-gray-700/50 mb-3 shadow">
+                                    <i data-lucide="lock" class="w-6 h-6"></i>
+                                </div>
+                                <h5 class="text-sm font-bold text-gray-200">Creation Restricted</h5>
+                                <p class="text-xs text-gray-400 mt-1 max-w-[200px]">Only the Workspace Admin or Mods can create new channels inside this room.</p>
+                            </div>
+                            <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
+                                <i data-lucide="plus-circle" class="text-indigo-400 w-4.5 h-4.5"></i> Add Trading Channels
+                            </h4>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider font-semibold">Channel Name</label>
+                                <input type="text" id="new-channel-name" placeholder="crypto-swings" class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold lowercase font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider font-semibold">Channel Type</label>
+                                <div class="flex rounded-xl overflow-hidden border border-darkBorder/60">
+                                    <button type="button" id="chan-type-text" onclick="setNewChannelType('text')" class="flex-grow py-2.5 bg-indigo-950/40 text-indigo-400 text-xs font-extrabold border-r border-darkBorder/60 transition duration-150">
+                                        # TEXT CHAT
+                                    </button>
+                                    <button type="button" id="chan-type-voice" onclick="setNewChannelType('voice')" class="flex-grow py-2.5 bg-darkBg text-gray-500 text-xs font-semibold transition duration-150">
+                                        🔊 VOICE ROOM
+                                    </button>
+                                </div>
+                            </div>
+                            <button onclick="createNewChannelSubmit()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-3 px-4 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/15">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Create Channel
+                            </button>
+                        </div>
+
+                        <!-- Active Channel Management List -->
+                        <div class="glass-panel p-5 rounded-2xl space-y-3">
+                            <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
+                                <i data-lucide="list-video" class="text-indigo-400 w-4.5 h-4.5"></i> Manage Workspace Channels
+                            </h4>
+                            <div class="space-y-2 max-h-48 overflow-y-auto pr-1" id="manage-channels-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: AI Co-Pilot Vocal Speech & TTS Parameters -->
+                    <div class="space-y-6 font-sans">
+                        <div class="glass-panel p-5 rounded-2xl space-y-4 shadow-lg">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
+                                    <i data-lucide="bot" class="text-indigo-400 w-4.5 h-4.5"></i> Co-Pilot Voice Engine
+                                </h4>
+                                <span class="bg-indigo-950 text-indigo-400 border border-indigo-800/40 text-[9px] font-bold px-1.5 py-0.5 rounded font-mono">GEMINI TTS</span>
+                            </div>
+                            <p class="text-xs text-gray-400 leading-relaxed">
+                                Customize the voice of your AI Risk Advisor. SyncPL integrates with Google's TTS engine to generate physical synthesized voices.
+                            </p>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">AI Voice Actor</label>
+                                <select id="tts-voice-selection" class="w-full bg-darkBg border border-darkBorder/60 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-white font-medium">
+                                    <option value="Zephyr">Zephyr (Bright)</option>
+                                    <option value="Puck">Puck (Upbeat)</option>
+                                    <option value="Charon">Charon (Informative)</option>
+                                    <option value="Kore" selected>Kore (Firm)</option>
+                                    <option value="Fenrir">Fenrir (Excitable)</option>
+                                    <option value="Leda">Leda (Youthful)</option>
+                                    <option value="Sulafat">Sulafat (Warm)</option>
+                                    <option value="Schedar">Schedar (Even)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">Vocal Prompt / Style Instructions</label>
+                                <input type="text" id="tts-vocal-prompt" placeholder="Say critically like a strict risk analyst..." class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono" value="Speak critically like a strict hedge fund risk analyst">
+                            </div>
+
+                            <!-- Push to Talk vs Continuous Selector -->
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">Microphone Activation</label>
+                                <div class="flex items-center justify-between bg-darkBg/60 p-3 border border-darkBorder/40 rounded-xl">
+                                    <span class="text-xs text-gray-300 font-medium">Continuous Voice Detection</span>
+                                    <div class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="continuous-audio-toggle" checked class="sr-only peer">
+                                        <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Microphone Sensitivity Slider -->
+                            <div>
+                                <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">
+                                    <span>Mic Input Sensitivity</span>
+                                    <span id="mic-sens-percentage" class="font-mono">80%</span>
+                                </div>
+                                <input type="range" min="1" max="100" value="80" id="mic-sensitivity-slider" class="w-full accent-indigo-500 cursor-pointer h-1.5 bg-gray-800 rounded-lg appearance-none">
+                            </div>
+
+                            <button onclick="triggerVoiceSpeakSim()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 px-4 rounded-xl transition flex items-center justify-center gap-1.5 shadow shadow-emerald-600/10 font-sans">
+                                <i data-lucide="volume-2" class="w-4 h-4"></i> Test Voice Co-Pilot
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL: Log Trade Record -->
+<div id="modal-log-pnl" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="bg-darkCard border border-darkBorder/60 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in duration-200">
+        <div class="p-5 border-b border-darkBorder/40 flex items-center justify-between bg-darkBg/50">
+            <div class="flex items-center space-x-2">
+                <i data-lucide="plus-square" class="text-indigo-400 w-5 h-5"></i>
+                <h3 class="font-extrabold text-gray-100">Log Trade Sync Record</h3>
+            </div>
+            <button onclick="closeLogModal()" class="text-gray-400 hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form id="pnl-log-form" onsubmit="handleLogFormSubmit(event)" class="p-6 space-y-4 text-gray-200">
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">P&L Amount ($ USD)</label>
+                <div class="flex rounded-xl overflow-hidden border border-darkBorder/60">
+                    <button type="button" id="btn-toggle-profit" onclick="setLogType(true)" class="flex-grow py-3 bg-emerald-950/30 text-emerald-400 text-sm font-extrabold border-r border-darkBorder/60 transition duration-150">
+                        PROFIT (+)
+                    </button>
+                    <button type="button" id="btn-toggle-loss" onclick="setLogType(false)" class="flex-grow py-3 bg-darkBg text-gray-500 text-sm font-semibold transition duration-150">
+                        LOSS (-)
+                    </button>
+                </div>
+                <div class="relative mt-2">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+                    <input type="number" step="0.01" id="pnl-amount-input" required placeholder="0.00" class="w-full bg-darkBg border border-darkBorder/60 rounded-xl pl-8 pr-4 py-3.5 text-lg font-black text-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Date</label>
+                    <input type="date" id="pnl-date-input" required class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-bold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Asset / Ticker</label>
+                    <input type="text" id="pnl-asset-input" placeholder="e.g. BTC, SPY" required class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 uppercase font-mono font-bold">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Strategy / Notes</label>
+                <textarea id="pnl-notes-input" placeholder="Describe context, scale, risk indicators..." rows="3" class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"></textarea>
+            </div>
+
+            <div class="pt-4 flex gap-3">
+                <button type="button" onclick="closeLogModal()" class="w-1/3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-sm py-3 rounded-xl transition">Cancel</button>
+                <button type="submit" class="w-2/3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm py-3 rounded-xl transition shadow-lg shadow-indigo-600/10 flex items-center justify-center gap-1.5">
+                    <i data-lucide="check-circle-2" class="w-4.5 h-4.5"></i> Sync Record
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: Rename Channel -->
+<div id="modal-rename-channel" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="bg-darkCard border border-darkBorder/60 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in duration-200">
+        <div class="p-5 border-b border-darkBorder/40 flex items-center justify-between bg-darkBg/50">
+            <div class="flex items-center space-x-2">
+                <i data-lucide="pencil" class="text-indigo-400 w-5 h-5"></i>
+                <h3 class="font-extrabold text-gray-100">Rename Workspace Channel</h3>
+            </div>
+            <button onclick="closeRenameModal()" class="text-gray-400 hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form id="rename-channel-form" onsubmit="handleRenameFormSubmit(event)" class="p-6 space-y-4 text-gray-200">
+            <input type="hidden" id="rename-target-id">
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Current Channel Name</label>
+                <input type="text" id="rename-current-name" readonly class="w-full bg-darkBg/50 border border-darkBorder/40 rounded-xl px-4 py-2.5 text-sm text-gray-500 font-semibold cursor-not-allowed">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">New Channel Name</label>
+                <input type="text" id="rename-new-name" required placeholder="new-channel-name" class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold lowercase font-mono">
+            </div>
+            <div class="pt-4 flex gap-3">
+                <button type="button" onclick="closeRenameModal()" class="w-1/3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-sm py-3 rounded-xl transition">Cancel</button>
+                <button type="submit" class="w-2/3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm py-3 rounded-xl transition flex items-center justify-center gap-1.5">
+                    <i data-lucide="check" class="w-4 h-4"></i> Save Name
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: Custom Confirm Dialog -->
+<div id="modal-confirm" class="hidden fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="bg-darkCard border border-darkBorder/60 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150">
+        <div class="p-5 border-b border-darkBorder/40 flex items-center justify-between bg-darkBg/50">
+            <h3 id="confirm-title" class="font-extrabold text-gray-100">Are you sure?</h3>
+            <button onclick="closeConfirmModal()" class="text-gray-400 hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div class="p-6">
+            <p id="confirm-message" class="text-sm text-gray-300 leading-relaxed"></p>
+        </div>
+        <div class="p-5 border-t border-darkBorder/40 bg-darkBg/30 flex gap-3">
+            <button onclick="closeConfirmModal()" class="w-1/2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-sm py-3 rounded-xl transition">Cancel</button>
+            <button id="confirm-action-btn" class="w-1/2 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-sm py-3 rounded-xl transition">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Shareable Flex Card -->
+<div id="modal-flex-card" class="hidden fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+        <div id="flex-card-render-box" class="glass-panel p-6 rounded-3xl border border-indigo-500/30 text-center relative overflow-hidden shadow-2xl bg-gradient-to-br from-indigo-950/50 via-gray-950 to-pink-950/20">
+            <div class="absolute -top-[20%] -right-[20%] w-[60%] h-[60%] rounded-full bg-indigo-500/20 filter blur-3xl font-sans"></div>
+            <div class="absolute -bottom-[20%] -left-[20%] w-[60%] h-[60%] rounded-full bg-pink-500/10 filter blur-3xl"></div>
+            
+            <div class="flex justify-between items-center mb-6 relative z-10">
+                <div class="flex items-center gap-2">
+                    <div class="p-1.5 bg-gradient-to-tr from-indigo-500 to-pink-500 rounded-lg text-white">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i>
+                    </div>
+                    <span class="text-[10px] font-black tracking-widest text-indigo-300 uppercase">SYNCPL VERIFIED</span>
+                </div>
+                <span class="text-[10px] font-mono font-extrabold text-gray-500 uppercase" id="flex-card-timestamp">2026/06/15</span>
+            </div>
+
+            <div class="space-y-4 relative z-10 my-4">
+                <p class="text-xs text-gray-400 font-bold tracking-widest uppercase">LEDGER PROFIT FLEX</p>
+                <p id="flex-card-pnl" class="text-4xl font-black text-emerald-400 tracking-tight">$0.00</p>
+                
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-gray-900 border border-darkBorder rounded-xl text-xs font-mono uppercase font-bold text-gray-300">
+                    <span id="flex-card-asset">BTC</span>
+                </div>
+                
+                <p class="text-xs text-gray-300 italic max-w-xs mx-auto" id="flex-card-notes">"Executed on technical break support level."</p>
+            </div>
+
+            <div class="pt-6 border-t border-darkBorder/40 mt-6 relative z-10 flex justify-between items-center text-left text-xs">
+                <div>
+                    <span class="block text-[8px] text-gray-500 uppercase tracking-wider font-extrabold">AUTHENTICATED TRADER</span>
+                    <span id="flex-card-trader" class="font-bold text-gray-200">Trader</span>
+                </div>
+                <div class="text-right">
+                    <span class="block text-[8px] text-gray-500 uppercase tracking-wider font-extrabold">VERIFICATION SIGN</span>
+                    <span class="font-mono font-bold text-indigo-400" id="flex-card-uuid">PL-E74A2</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 flex gap-3">
+            <button onclick="closeFlexCardModal()" class="w-1/3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-xs py-3 rounded-xl transition">Close</button>
+            <button onclick="copyFlexCardClipboard()" class="w-2/3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-3 rounded-xl transition flex items-center justify-center gap-1.5 font-sans">
+                <i data-lucide="clipboard" class="w-4.5 h-4.5"></i> Copy Image Link
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- TOASTS -->
+<div id="toast-notif" class="fixed top-5 right-5 z-50 transform translate-y-12 opacity-0 pointer-events-none transition duration-300 flex items-center bg-indigo-950 border border-indigo-800 text-white px-4 py-3.5 rounded-xl shadow-2xl max-w-sm">
+    <div id="toast-icon-box" class="p-1.5 rounded-lg bg-indigo-600/20 text-indigo-400 mr-3 animate-pulse">
+        <i data-lucide="info" class="w-5 h-5"></i>
+    </div>
+    <div class="flex-grow">
+        <p id="toast-title" class="text-sm font-extrabold"></p>
+        <p id="toast-body" class="text-xs text-gray-300 mt-0.5"></p>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Application Configuration - Synchronized with live database credentials
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'trading-pnl-sync-2026';
+    const fallbackConfig = {
+        apiKey: "AIzaSyBo7L4wLVLmursIzQvDujXU7ECYoRw2-uw",
+        authDomain: "syncpl-fe47a.firebaseapp.com",
+        projectId: "syncpl-fe47a",
+        storageBucket: "syncpl-fe47a.firebasestorage.app",
+        messagingSenderId: "242104219490",
+        appId: "1:242104219490:web:af72014d20daa401f51e3b",
+        measurementId: "G-T3H5NJ2TK3"
+    };
+    
+    let configStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+    let firebaseConfig = fallbackConfig;
+    if (configStr) {
+        try {
+            firebaseConfig = JSON.parse(configStr);
+        } catch (e) {
+            console.error("Config parse failed, fallback loaded", e);
+        }
+    }
+
+    // Initialize Connection SDKs
+    let app, db, auth;
+    try {
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+    } catch (e) {
+        console.warn("Firebase Init Exception: using mock services", e);
+    }
+
+    // Global State Containers (Proper let variables initialized safely)
+    let currentUser = null;
+    let userGroupId = "";
+    let localUsername = "Anonymous";
+    let userAvatarColor = "indigo"; // indigo, pink, emerald, amber, sky
+    
+    let userAvatarType = "emoji"; // emoji, url
+    let userAvatarVal = "🐂"; // default preset emoji
+    
+    let pnlLogs = [];
+    let groupSummaries = [];
+    let chatMessages = [];
+    let voiceUsers = [];
+    let customChannels = []; // Synchronized list of text & voice channels
+    let roomAdminId = ""; // Track current creator of the room
+    let roomMods = []; // Synchronized moderator IDs list
+    let isFirstVoiceLoad = true; // Block chime barrage on initial database query
+    
+    // Unsubscribe references
+    let syncListenerUnsubscribe = null;
+    let entriesListenerUnsubscribe = null;
+    let chatListenerUnsubscribe = null;
+    let voiceUsersListenerUnsubscribe = null;
+    let channelsListenerUnsubscribe = null;
+    let roomMetadataListenerUnsubscribe = null;
+    
+    let performanceChart = null;
+
+    // View configurations
+    let logScope = "all"; 
+    let currentLeaderboardPeriod = "daily"; 
+    let currentActiveTab = "dashboard";
+    let activeLogPnlType = true; 
+    let activeChatChannel = "general-trading";
+    let activeChatChannelType = "text"; 
+    let newChannelTypeSelection = "text"; // text or voice
+
+    // Voice variables
+    let isMuted = false;
+    let isDeafened = false;
+    let activeVoiceChannel = null; 
+    let userMediaStream = null;
+
+    // Audio elements & speech synthesis playing
+    let isAiSpeaking = false;
+    let currentSpeechAudio = null;
+
+    // Custom confirmation callback registry
+    let confirmActionCallback = null;
+
+    // Synchronizer tones
+    function playVoiceRoomSound(type) {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const now = ctx.currentTime;
+            
+            if (type === 'join') {
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(523.25, now);
+                gain1.gain.setValueAtTime(0.08, now);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.15);
+
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(659.25, now + 0.08);
+                gain2.gain.setValueAtTime(0.08, now + 0.08);
+                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.start(now + 0.08);
+                osc2.stop(now + 0.3);
+            } else if (type === 'leave') {
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(659.25, now);
+                gain1.gain.setValueAtTime(0.06, now);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.15);
+
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(523.25, now + 0.08);
+                gain2.gain.setValueAtTime(0.06, now + 0.08);
+                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.start(now + 0.08);
+                osc2.stop(now + 0.3);
+            }
+        } catch (e) {
+            console.warn("AudioContext blocked:", e);
+        }
+    }
+
+    // Window Onload lifecycle
+    window.onload = async function() {
+        lucide.createIcons();
+        initDefaultInputs();
+        setupInputSliders();
+        initLiveTickerTape(); 
+        await initApplicationAuth();
+    };
+
+    function initDefaultInputs() {
+        document.getElementById('pnl-date-input').value = new Date().toISOString().split('T')[0];
+    }
+
+    function setupInputSliders() {
+        const slider = document.getElementById('mic-sensitivity-slider');
+        const display = document.getElementById('mic-sens-percentage');
+        if (slider && display) {
+            slider.oninput = function() {
+                display.innerText = `${this.value}%`;
+            };
+        }
+    }
+
+    // Authentication Sequence (RULE 3)
+    async function initApplicationAuth() {
+        try {
+            let userCredential;
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                userCredential = await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                userCredential = await signInAnonymously(auth);
+            }
+            currentUser = userCredential.user;
+            await initSyncAndUserDoc();
+        } catch (error) {
+            console.error("Auth Exception:", error);
+            showToast("Sync offline", "Fallback local mode started.", "error");
+            hideLoader();
+        }
+    }
+
+    async function initSyncAndUserDoc() {
+        if (!currentUser) return;
+
+        // RULE 1 COMPLIANCE: Private user profiles stored in users/{userId}/profile/info (6 segments)
+        const configDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'info');
+        let userProfile = null;
+        
+        try {
+            const snap = await getDoc(configDocRef);
+            if (snap.exists()) {
+                userProfile = snap.data();
+                localUsername = userProfile.username || `Trader_${currentUser.uid.substring(0, 5)}`;
+                userGroupId = userProfile.groupId || ""; 
+                userAvatarColor = userProfile.avatarColor || "indigo";
+                userAvatarType = userProfile.avatarType || "emoji";
+                userAvatarVal = userProfile.avatarVal || "🐂";
+            } else {
+                localUsername = `Trader_${currentUser.uid.substring(0, 5)}`;
+                userGroupId = ""; 
+                userAvatarColor = "indigo";
+                userAvatarType = "emoji";
+                userAvatarVal = "🐂";
+                userProfile = {
+                    username: localUsername,
+                    groupId: userGroupId,
+                    avatarColor: userAvatarColor,
+                    avatarType: userAvatarType,
+                    avatarVal: userAvatarVal,
+                    createdAt: new Date().toISOString()
+                };
+                await setDoc(configDocRef, userProfile);
+            }
+        } catch (err) {
+            console.error("Profile exception:", err);
+            localUsername = `Trader_${currentUser.uid.substring(0, 5)}`;
+            userGroupId = "";
+        }
+
+        updateDisplayValues();
+        
+        if (userGroupId) {
+            hideMainMenu();
+            await initFirestoreDataListeners();
+        } else {
+            showMainMenu();
+            hideLoader();
+        }
+    }
+
+    function showMainMenu() {
+        // FIXED LAYOUT OVERLAP ({E44CF6D8-9765-45C2-B554-5117EDEDFBC7}.png): Hide #app entirely when Welcome is active!
+        document.getElementById('main-menu-overlay').classList.remove('hidden');
+        document.getElementById('app').classList.add('hidden');
+        document.getElementById('menu-username-input').value = localUsername;
+    }
+
+    function hideMainMenu() {
+        document.getElementById('main-menu-overlay').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+    }
+
+    function renderAvatarHTML(avatarType, avatarVal, avatarColor, username, size = 10) {
+        const colorClasses = {
+            indigo: "bg-indigo-500/10 border-indigo-500/30 text-indigo-400",
+            pink: "bg-pink-500/10 border-pink-500/30 text-pink-400",
+            emerald: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
+            amber: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+            sky: "bg-sky-500/10 border-sky-500/30 text-sky-400"
+        };
+        const activeClass = colorClasses[avatarColor] || colorClasses.indigo;
+        const sizeClass = `w-${size} h-${size}`;
+        const fontClass = size < 10 ? 'text-[9px]' : 'text-sm';
+        const emojiFontClass = size < 10 ? 'text-sm' : 'text-lg';
+
+        if (avatarType === 'url' && avatarVal) {
+            const fallbackText = escapeHTML(username).substring(0, 2).toUpperCase();
+            return `<div class="${sizeClass} rounded-full border border-darkBorder/40 overflow-hidden flex items-center justify-center bg-gray-900 shrink-0 shadow-inner">
+                <img src="${escapeHTML(avatarVal)}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');">
+                <span class="hidden w-full h-full items-center justify-center font-bold ${fontClass} text-indigo-400 ${activeClass}">${fallbackText}</span>
+            </div>`;
+        } else if (avatarType === 'emoji' && avatarVal) {
+            return `<div class="${sizeClass} rounded-full border flex items-center justify-center font-bold ${emojiFontClass} ${activeClass} shrink-0">
+                ${escapeHTML(avatarVal)}
+            </div>`;
+        } else {
+            return `<div class="${sizeClass} rounded-full border flex items-center justify-center font-bold ${fontClass} ${activeClass} shrink-0">
+                ${escapeHTML(username).substring(0, 2).toUpperCase()}
+            </div>`;
+        }
+    }
+
+    function updateDisplayValues() {
+        document.getElementById('user-display-name').innerText = localUsername;
+        
+        const avatarEl = document.getElementById('user-avatar');
+        if (avatarEl) {
+            avatarEl.innerHTML = renderAvatarHTML(userAvatarType, userAvatarVal, userAvatarColor, localUsername, 10);
+        }
+
+        document.getElementById('top-room-code').innerText = userGroupId || "No Room";
+        document.getElementById('settings-room-code').innerText = userGroupId || "No Room";
+        document.getElementById('settings-username-input').value = localUsername;
+
+        document.querySelectorAll('#profile-color-selector button').forEach(btn => {
+            btn.classList.remove('border-white', 'ring-2');
+        });
+        const activeColBtn = document.getElementById(`col-${userAvatarColor}`);
+        if (activeColBtn) activeColBtn.classList.add('border-white', 'ring-2');
+
+        const emojiTab = document.getElementById('pfp-type-emoji');
+        const urlTab = document.getElementById('pfp-type-url');
+        const emojiRow = document.getElementById('pfp-emoji-picker-row');
+        const urlRow = document.getElementById('pfp-url-picker-row');
+
+        if (emojiTab && urlTab && emojiRow && urlRow) {
+            if (userAvatarType === 'emoji') {
+                emojiTab.className = "flex-grow py-2 bg-indigo-950/40 text-indigo-400 text-xs font-extrabold border-r border-darkBorder/60 transition duration-150";
+                urlTab.className = "flex-grow py-2 bg-darkBg text-gray-500 text-xs font-semibold transition duration-150";
+                emojiRow.classList.remove('hidden');
+                urlRow.classList.add('hidden');
+                
+                document.querySelectorAll('.pfp-emoji-btn').forEach(btn => {
+                    btn.className = "pfp-emoji-btn p-2 bg-darkBg border border-darkBorder/60 hover:border-indigo-500 rounded-xl text-lg text-center transition duration-150";
+                });
+                const emojiIdMap = {
+                    '🐂': 'em-bull', '🐻': 'em-bear', '🐳': 'em-whale', '🚀': 'em-rocket',
+                    '📈': 'em-chart', '💰': 'em-bag', '⚡': 'em-speed', '🧠': 'em-brain',
+                    '👑': 'em-crown', '🎯': 'em-target'
+                };
+                const targetId = emojiIdMap[userAvatarVal];
+                if (targetId) {
+                    const activeEmojiBtn = document.getElementById(targetId);
+                    if (activeEmojiBtn) activeEmojiBtn.className = "pfp-emoji-btn p-2 bg-indigo-950 border border-indigo-500 rounded-xl text-lg text-center transition duration-150";
+                }
+            } else {
+                emojiTab.className = "flex-grow py-2 bg-darkBg text-gray-500 text-xs font-semibold border-r border-darkBorder/60 transition duration-150";
+                urlTab.className = "flex-grow py-2 bg-indigo-950/40 text-indigo-400 text-xs font-extrabold transition duration-150";
+                emojiRow.classList.add('hidden');
+                urlRow.classList.remove('hidden');
+                const customUrlInput = document.getElementById('pfp-custom-url-input');
+                if (customUrlInput) customUrlInput.value = userAvatarVal;
+            }
+        }
+    }
+
+    window.setAvatarType = function(type) {
+        userAvatarType = type;
+        if (type === 'emoji' && !['🐂', '🐻', '🐳', '🚀', '📈', '💰', '⚡', '🧠', '👑', '🎯'].includes(userAvatarVal)) {
+            userAvatarVal = "🐂"; 
+        }
+        updateDisplayValues();
+    };
+
+    window.setAvatarVal = function(val) {
+        userAvatarVal = val;
+        updateDisplayValues();
+    };
+
+    window.setAvatarValFromUrlInput = function() {
+        const input = document.getElementById('pfp-custom-url-input');
+        if (input) {
+            userAvatarVal = input.value.trim();
+        }
+    };
+
+    async function initFirestoreDataListeners() {
+        if (!currentUser) return;
+
+        if (syncListenerUnsubscribe) syncListenerUnsubscribe();
+        if (entriesListenerUnsubscribe) entriesListenerUnsubscribe();
+        if (chatListenerUnsubscribe) chatListenerUnsubscribe();
+        if (voiceUsersListenerUnsubscribe) voiceUsersListenerUnsubscribe();
+        if (channelsListenerUnsubscribe) channelsListenerUnsubscribe();
+        if (roomMetadataListenerUnsubscribe) roomMetadataListenerUnsubscribe();
+
+        try {
+            // 1. Listen to active room metadata / Creator details
+            const roomMetaRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', userGroupId);
+            roomMetadataListenerUnsubscribe = onSnapshot(roomMetaRef, async (docSnap) => {
+                if (docSnap.exists()) {
+                    roomAdminId = docSnap.data().creatorId || "";
+                    roomMods = docSnap.data().moderators || []; 
+                } else {
+                    try {
+                        await setDoc(roomMetaRef, {
+                            creatorId: currentUser.uid,
+                            creatorName: localUsername,
+                            moderators: [], 
+                            createdAt: new Date().toISOString()
+                        });
+                        roomAdminId = currentUser.uid;
+                        roomMods = [];
+                    } catch (err) {
+                        console.warn("Could not write room metadata: ", err);
+                    }
+                }
+                updateAdminBadgeDisplay();
+                drawManageChannelsListUI();
+                drawActiveChatPartners();
+                drawLeaderboard();
+            }, (error) => console.error("Room metadata stream issue: ", error));
+
+            // 2. Group Member Summaries
+            const summariesQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'user_summaries'));
+            syncListenerUnsubscribe = onSnapshot(summariesQuery, (snapshot) => {
+                const summaries = [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.groupId === userGroupId) {
+                        summaries.push({ id: doc.id, ...data });
+                    }
+                });
+                groupSummaries = summaries;
+                document.getElementById('group-member-count').innerText = groupSummaries.length;
+                triggerUIPaint();
+            }, (error) => console.error("Summaries stream error: ", error));
+
+            // 3. Ledger Entries sync
+            const logsQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'pnl_logs'));
+            entriesListenerUnsubscribe = onSnapshot(logsQuery, (snapshot) => {
+                const logs = [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.groupId === userGroupId) {
+                        logs.push({ id: doc.id, ...data });
+                    }
+                });
+                pnlLogs = logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                triggerUIPaint();
+                hideLoader();
+            }, (error) => {
+                console.error("Ledger stream error: ", error);
+                hideLoader();
+            });
+
+            // 4. Dynamic Channels Customizer Stream
+            const channelsQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'channels'));
+            channelsListenerUnsubscribe = onSnapshot(channelsQuery, async (snapshot) => {
+                const list = [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.groupId === userGroupId) {
+                        list.push({ id: doc.id, ...data });
+                    }
+                });
+                customChannels = list.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+                if (customChannels.length === 0) {
+                    await setupDefaultChannelsForGroup();
+                } else {
+                    drawDynamicChannelsUI();
+                    drawManageChannelsListUI();
+                }
+            }, (error) => console.error("Channels stream error: ", error));
+
+            // 5. Group text messaging
+            const chatQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'chat_messages'));
+            chatListenerUnsubscribe = onSnapshot(chatQuery, (snapshot) => {
+                const msgs = [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.groupId === userGroupId) {
+                        msgs.push({ id: doc.id, ...data });
+                    }
+                });
+                chatMessages = msgs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                
+                triggerChatNotificationBadge();
+                drawWorkspaceChat();
+            }, (error) => console.error("Chat message stream error: ", error));
+
+            // 6. Shared Voice connections
+            const voiceQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'voice_users'));
+            isFirstVoiceLoad = true; 
+
+            voiceUsersListenerUnsubscribe = onSnapshot(voiceQuery, (snapshot) => {
+                const previousVoiceUsersMap = {};
+                voiceUsers.forEach(v => {
+                    previousVoiceUsersMap[v.userId] = v.channel;
+                });
+
+                const users = [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.groupId === userGroupId) {
+                        users.push({ id: doc.id, ...data });
+                    }
+                });
+
+                if (!isFirstVoiceLoad) {
+                    users.forEach(u => {
+                        const oldChan = previousVoiceUsersMap[u.userId];
+                        if (u.channel && oldChan !== u.channel) {
+                            playVoiceRoomSound('join');
+                        }
+                    });
+
+                    const currentUsersMap = {};
+                    users.forEach(u => {
+                        currentUsersMap[u.userId] = u.channel;
+                    });
+                    Object.keys(previousVoiceUsersMap).forEach(uid => {
+                        const oldChan = previousVoiceUsersMap[uid];
+                        const newChan = currentUsersMap[uid];
+                        if (oldChan && (!newChan || newChan !== oldChan)) {
+                            if (!newChan) {
+                                playVoiceRoomSound('leave');
+                            }
+                        }
+                    });
+                } else {
+                    isFirstVoiceLoad = false;
+                }
+
+                voiceUsers = users;
+                
+                updateVoiceChannelHeadcounts();
+                drawVoiceConnectedUsersPanel();
+            }, (error) => console.error("Voice directory stream error: ", error));
+
+            await updatePublicUserSummary();
+
+        } catch (error) {
+            console.error("Firestore initialization aborted: ", error);
+            hideLoader();
+        }
+    }
+
+    // Role badge controllers
+    function updateAdminBadgeDisplay() {
+        const isAdmin = (currentUser && roomAdminId === currentUser.uid);
+        const isMod = (currentUser && roomMods.includes(currentUser.uid));
+        const isAuthorized = isAdmin || isMod;
+        
+        const navBadge = document.getElementById('admin-badge-nav');
+        if (navBadge) {
+            if (isAdmin) {
+                navBadge.innerHTML = "👑 Admin";
+                navBadge.className = "text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-extrabold flex items-center gap-0.5";
+                navBadge.classList.remove('hidden');
+            } else if (isMod) {
+                navBadge.innerHTML = "🛡️ Mod";
+                navBadge.className = "text-[9px] bg-sky-500/15 text-sky-400 border border-sky-500/30 px-1.5 py-0.5 rounded font-extrabold flex items-center gap-0.5";
+                navBadge.classList.remove('hidden');
+            } else {
+                navBadge.classList.add('hidden');
+            }
+        }
+
+        const settingsHeader = document.getElementById('settings-admin-header');
+        if (settingsHeader) {
+            if (isAdmin) {
+                settingsHeader.innerHTML = `<i data-lucide="crown" class="w-4 h-4"></i> <span class="text-xs font-extrabold uppercase tracking-wider">Workspace Administrator Console</span>`;
+                settingsHeader.className = "bg-amber-500/10 border border-amber-500/20 text-amber-400 px-4 py-2.5 rounded-xl flex items-center gap-2 self-start md:self-auto shadow-md shadow-amber-500/5";
+                settingsHeader.classList.remove('hidden');
+            } else if (isMod) {
+                settingsHeader.innerHTML = `<i data-lucide="shield" class="w-4 h-4 text-sky-400"></i> <span class="text-xs font-extrabold uppercase tracking-wider text-sky-400">Workspace Moderator Console</span>`;
+                settingsHeader.className = "bg-sky-500/10 border border-sky-500/20 text-sky-400 px-4 py-2.5 rounded-xl flex items-center gap-2 self-start md:self-auto shadow-md shadow-sky-500/5";
+                settingsHeader.classList.remove('hidden');
+            } else {
+                settingsHeader.classList.add('hidden');
+            }
+        }
+
+        const creationOverlay = document.getElementById('channel-create-lock-overlay');
+        if (creationOverlay) {
+            if (isAuthorized) creationOverlay.classList.add('hidden');
+            else creationOverlay.classList.remove('hidden');
+        }
+        lucide.createIcons();
+    }
+
+    async function setupDefaultChannelsForGroup() {
+        try {
+            const channelsCol = collection(db, 'artifacts', appId, 'public', 'data', 'channels');
+            const defaults = [
+                { name: 'general-trading', type: 'text', groupId: userGroupId, createdAt: new Date().toISOString() },
+                { name: 'pnl-flex', type: 'text', groupId: userGroupId, createdAt: new Date().toISOString() },
+                { name: 'market-alpha', type: 'text', groupId: userGroupId, createdAt: new Date().toISOString() },
+                { name: 'Voice Desk 1', type: 'voice', groupId: userGroupId, createdAt: new Date().toISOString() },
+                { name: '🤖 AI Risk Assistant', type: 'voice', groupId: userGroupId, createdAt: new Date().toISOString() }
+            ];
+            for (const item of defaults) {
+                await addDoc(channelsCol, item);
+            }
+        } catch (e) {
+            console.error("Default channel creation skipped: ", e);
+        }
+    }
+
+    function drawDynamicChannelsUI() {
+        const container = document.getElementById('dynamic-channels-list');
+        if (!container) return;
+
+        container.innerHTML = '';
+        
+        const textHeader = document.createElement('div');
+        textHeader.className = "text-[10px] font-bold text-gray-500 uppercase px-2 mb-1.5 tracking-wider";
+        textHeader.innerText = "Text Channels";
+        container.appendChild(textHeader);
+
+        const textChans = customChannels.filter(c => c.type === 'text');
+        textChans.forEach(chan => {
+            const isSelected = activeChatChannel === chan.name;
+            const btn = document.createElement('button');
+            btn.className = `w-full flex items-center space-x-2 px-2.5 py-2 rounded-xl text-sm transition ${isSelected ? 'bg-indigo-600/15 text-white font-semibold' : 'text-gray-400 hover:bg-gray-800/40 hover:text-white'}`;
+            btn.onclick = () => selectChatChannel(chan.name, 'text');
+            btn.innerHTML = `
+                <span class="text-indigo-400/50 font-bold">#</span>
+                <span class="truncate">${escapeHTML(chan.name)}</span>
+            `;
+            container.appendChild(btn);
+        });
+
+        const voiceHeader = document.createElement('div');
+        voiceHeader.className = "text-[10px] font-bold text-gray-500 uppercase px-2 pt-4 mb-1.5 tracking-wider";
+        voiceHeader.innerText = "Voice Rooms";
+        container.appendChild(voiceHeader);
+
+        const voiceChans = customChannels.filter(c => c.type === 'voice');
+        voiceChans.forEach(chan => {
+            const isConnected = activeVoiceChannel === chan.name;
+            const count = voiceUsers.filter(v => v.channel === chan.name).length;
+            const isAi = chan.name.includes("🤖") || chan.name.toLowerCase().includes("ai");
+
+            const btn = document.createElement('button');
+            btn.className = `w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-sm transition ${isConnected ? (isAi ? 'bg-pink-600/10 text-pink-400 font-semibold' : 'bg-emerald-600/10 text-emerald-400 font-semibold') : 'text-gray-400 hover:bg-gray-800/40 hover:text-white'}`;
+            btn.onclick = () => toggleVoiceRoom(chan.name);
+            
+            btn.innerHTML = `
+                <div class="flex items-center space-x-2 truncate">
+                    <i data-lucide="${isAi ? 'bot' : 'volume-2'}" class="w-4 h-4 shrink-0 ${isAi ? 'text-pink-400 animate-pulse' : ''}"></i>
+                    <span class="truncate">${escapeHTML(chan.name)}</span>
+                </div>
+                <span class="text-[10px] bg-gray-950/60 px-2 py-0.5 rounded-lg border border-gray-800/60 font-mono font-bold">${count}</span>
+            `;
+            container.appendChild(btn);
+        });
+
+        lucide.createIcons();
+    }
+
+    function drawManageChannelsListUI() {
+        const container = document.getElementById('manage-channels-list');
+        if (!container) return;
+
+        container.innerHTML = '';
+        if (customChannels.length === 0) {
+            container.innerHTML = `<p class="text-xs text-gray-500 italic py-2">No custom channels created</p>`;
+            return;
+        }
+
+        const isAdmin = currentUser && roomAdminId === currentUser.uid;
+        const isMod = currentUser && roomMods.includes(currentUser.uid);
+        const isAuthorized = isAdmin || isMod;
+
+        customChannels.forEach(chan => {
+            const row = document.createElement('div');
+            row.className = "flex items-center justify-between p-2.5 bg-darkBg/50 border border-darkBorder/40 rounded-xl";
+            
+            let actionMarkup = '';
+            if (isAuthorized) {
+                actionMarkup = `
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="openRenameModal('${chan.id}', '${chan.name}')" class="text-xs text-indigo-400 hover:text-indigo-300 transition p-1.5 hover:bg-indigo-950/40 rounded-xl" title="Rename Channel">
+                            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <button onclick="deleteCustomChannel('${chan.id}', '${chan.name}')" class="text-xs text-rose-400 hover:text-rose-300 transition p-1.5 hover:bg-rose-950/40 rounded-xl" title="Delete Channel">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                actionMarkup = `<span class="text-[9px] text-gray-500 font-bold uppercase select-none px-2 py-1 bg-darkBg border border-darkBorder/50 rounded-lg flex items-center gap-1"><i data-lucide="lock" class="w-2.5 h-2.5"></i> Locked</span>`;
+            }
+
+            row.innerHTML = `
+                <div class="flex items-center space-x-2 min-w-0">
+                    <span class="text-xs text-gray-500 font-bold">${chan.type === 'text' ? '#' : '🔊'}</span>
+                    <span class="text-xs text-gray-300 font-semibold truncate">${escapeHTML(chan.name)}</span>
+                </div>
+                ${actionMarkup}
+            `;
+            container.appendChild(row);
+        });
+        lucide.createIcons();
+    }
+
+    window.setNewChannelType = function(type) {
+        newChannelTypeSelection = type;
+        const textBtn = document.getElementById('chan-type-text');
+        const voiceBtn = document.getElementById('chan-type-voice');
+        if (type === 'text') {
+            textBtn.className = "flex-grow py-2.5 bg-indigo-950/40 text-indigo-400 text-xs font-extrabold border-r border-darkBorder/60 transition duration-150";
+            voiceBtn.className = "flex-grow py-2.5 bg-darkBg text-gray-500 text-xs font-semibold transition duration-150";
+        } else {
+            textBtn.className = "flex-grow py-2.5 bg-darkBg text-gray-500 text-xs font-semibold border-r border-darkBorder/60 transition duration-150";
+            voiceBtn.className = "flex-grow py-2.5 bg-indigo-950/40 text-indigo-400 text-xs font-extrabold transition duration-150";
+        }
+    };
+
+    window.createNewChannelSubmit = async function() {
+        const isAdmin = currentUser && roomAdminId === currentUser.uid;
+        const isMod = currentUser && roomMods.includes(currentUser.uid);
+        if (!isAdmin && !isMod) {
+            showToast("Permission Denied", "Only administrators or moderators can configure channels.", "error");
+            return;
+        }
+
+        const nameField = document.getElementById('new-channel-name');
+        const nameVal = nameField.value.trim().toLowerCase().replace(/\s+/g, '-');
+        if (!nameVal) {
+            showToast("Required Fields", "Please enter a channel name.", "error");
+            return;
+        }
+
+        const duplicated = customChannels.some(c => c.name === nameVal && c.groupId === userGroupId);
+        if (duplicated) {
+            showToast("Duplicate Name", "This channel name already exists.", "error");
+            return;
+        }
+
+        showLoader();
+        try {
+            const channelsCol = collection(db, 'artifacts', appId, 'public', 'data', 'channels');
+            await addDoc(channelsCol, {
+                name: nameVal,
+                type: newChannelTypeSelection,
+                groupId: userGroupId,
+                createdAt: new Date().toISOString()
+            });
+            nameField.value = '';
+            showToast("Channel Created", `Successfully made ${nameVal}!`, "success");
+        } catch (e) {
+            console.error("Create channel error: ", e);
+            showToast("Action Failed", "Could not sync new channels node.", "error");
+        } finally {
+            hideLoader();
+        }
+    };
+
+    window.openRenameModal = function(docId, name) {
+        const isAdmin = currentUser && roomAdminId === currentUser.uid;
+        const isMod = currentUser && roomMods.includes(currentUser.uid);
+        if (!isAdmin && !isMod) {
+            showToast("Admin Only", "Only administrators or moderators can rename channels.", "error");
+            return;
+        }
+        document.getElementById('rename-target-id').value = docId;
+        document.getElementById('rename-current-name').value = name;
+        document.getElementById('rename-new-name').value = name;
+        document.getElementById('modal-rename-channel').classList.remove('hidden');
+    };
+
+    window.closeRenameModal = function() {
+        document.getElementById('modal-rename-channel').classList.add('hidden');
+    };
+
+    window.handleRenameFormSubmit = async function(event) {
+        event.preventDefault();
+        const isAdmin = currentUser && roomAdminId === currentUser.uid;
+        const isMod = currentUser && roomMods.includes(currentUser.uid);
+        if (!isAdmin && !isMod) {
+            showToast("Action Revoked", "Admins or moderators only.", "error");
+            return;
+        }
+
+        const docId = document.getElementById('rename-target-id').value;
+        const newName = document.getElementById('rename-new-name').value.trim().toLowerCase().replace(/\s+/g, '-');
+        if (!newName) return;
+
+        showLoader();
+        try {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'channels', docId);
+            await updateDoc(docRef, { name: newName });
+            
+            const currentSelectedName = document.getElementById('rename-current-name').value;
+            if (activeChatChannel === currentSelectedName) {
+                activeChatChannel = newName;
+                document.getElementById('active-chat-channel-title').innerText = newName;
+            }
+
+            closeRenameModal();
+            showToast("Channel Renamed", `Updated to #${newName}!`, "success");
+        } catch (e) {
+            console.error("Rename channel error:", e);
+            showToast("Modification Failed", "Check Firestore synchronization status.", "error");
+        } finally {
+            hideLoader();
+        }
+    };
+
+    // restored robust deleteCustomChannel function
+    window.deleteCustomChannel = async function(docId, name) {
+        const isAdmin = currentUser && roomAdminId === currentUser.uid;
+        const isMod = currentUser && roomMods.includes(currentUser.uid);
+        if (!isAdmin && !isMod) {
+            showToast("Admin Only", "Only admins or moderators can delete channels.", "error");
+            return;
+        }
+
+        showCustomConfirm(
+            "Delete Channel", 
+            `Are you sure you want to permanently delete the channel #${name}? All live activities inside this node will be disconnected.`, 
+            async () => {
+                showLoader();
+                try {
+                    if (activeVoiceChannel === name) {
+                        await disconnectVoice();
+                    }
+
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'channels', docId);
+                    await deleteDoc(docRef);
+
+                    if (activeChatChannel === name) {
+                        const remainingTextChan = customChannels.find(c => c.type === 'text' && c.id !== docId);
+                        if (remainingTextChan) {
+                            selectChatChannel(remainingTextChan.name, 'text');
+                        } else {
+                            activeChatChannel = '';
+                            document.getElementById('active-chat-channel-title').innerText = 'Select a Channel';
+                            const chatContainer = document.getElementById('chat-messages-container');
+                            if (chatContainer) {
+                                chatContainer.innerHTML = `
+                                    <div class="flex flex-col items-center justify-center h-full py-16 text-gray-500">
+                                        <i data-lucide="message-square" class="w-12 h-12 text-gray-700 mb-2"></i>
+                                        <p class="text-sm font-bold">No channels are active</p>
+                                        <p class="text-xs text-center px-4">Create or configure a text channel in workspace settings!</p>
+                                    </div>
+                                `;
+                                lucide.createIcons();
+                            }
+                        }
+                    }
+
+                    showToast("Channel Removed", `Successfully deleted channel: ${name}`, "info");
+                } catch (e) {
+                    console.error("Delete channel error:", e);
+                    showToast("Action Failed", "Could not remove selected workspace channel.", "error");
+                } finally {
+                    hideLoader();
+                }
+            }
+        );
+    };
+
+    window.showCustomConfirm = function(title, message, callback) {
+        document.getElementById('confirm-title').innerText = title;
+        document.getElementById('confirm-message').innerText = message;
+        confirmActionCallback = callback;
+        document.getElementById('modal-confirm').classList.remove('hidden');
+    };
+
+    window.closeConfirmModal = function() {
+        document.getElementById('modal-confirm').classList.add('hidden');
+        confirmActionCallback = null;
+    };
+
+    document.getElementById('confirm-action-btn').onclick = function() {
+        if (confirmActionCallback) {
+            confirmActionCallback();
+        }
+        closeConfirmModal();
+    };
+
+    async function updatePublicUserSummary() {
+        if (!currentUser || !db) return;
+        const sumRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_summaries', currentUser.uid);
+        
+        const myLogs = pnlLogs.filter(log => log.userId === currentUser.uid);
+        
+        let dailyVal = 0;
+        let weeklyVal = 0;
+        let monthlyVal = 0;
+        let wins = 0;
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const currentYearMonth = todayStr.substring(0, 7); 
+        
+        const d = new Date();
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1); 
+        const mondayStr = new Date(d.setDate(diff)).toISOString().split('T')[0];
+
+        myLogs.forEach(entry => {
+            const amount = parseFloat(entry.amount);
+            if (entry.amount >= 0) wins++;
+            
+            if (entry.date === todayStr) {
+                dailyVal += amount;
+            }
+            if (entry.date >= mondayStr) {
+                weeklyVal += amount;
+            }
+            if (entry.date.startsWith(currentYearMonth)) {
+                monthlyVal += amount;
+            }
+        });
+
+        const winRate = myLogs.length > 0 ? Math.round((wins / myLogs.length) * 100) : 0;
+
+        await setDoc(sumRef, {
+            userId: currentUser.uid,
+            username: localUsername,
+            avatarColor: userAvatarColor,
+            avatarType: userAvatarType,
+            avatarVal: userAvatarVal,
+            groupId: userGroupId,
+            daily_pl: dailyVal,
+            weekly_pl: weeklyVal,
+            monthly_pl: monthlyVal,
+            win_rate: winRate,
+            trades_logged: myLogs.length,
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+    }
+
+    function triggerUIPaint() {
+        calculateGlobalStats();
+        drawConsistencyCalendar(); 
+        drawActivityFeed();
+        drawLeaderboard();
+        drawLogsTable();
+        drawSyncChart();
+    }
+
+    function initLiveTickerTape() {
+        const strip = document.getElementById('live-price-ticker-strip');
+        if (!strip) return;
+
+        const tickers = [
+            { symbol: "BTC/USD", price: 92840.50, change: 1.45 },
+            { symbol: "ETH/USD", price: 3420.25, change: -0.85 },
+            { symbol: "NQ", price: 19850.75, change: 0.85 },
+            { symbol: "SNP500", price: 5430.50, change: 0.42 },
+            { symbol: "SPY", price: 542.10, change: 0.22 },
+            { symbol: "QQQ", price: 472.95, change: 0.61 },
+            { symbol: "EUR/USD", price: 1.0825, change: -0.12 },
+            { symbol: "GOLD", price: 2384.80, change: 1.15 }
+        ];
+
+        function renderTape() {
+            let markup = "";
+            const combined = [...tickers, ...tickers, ...tickers];
+            combined.forEach(t => {
+                const changeIsPositive = t.change >= 0;
+                markup += `
+                    <span class="ticker-item">
+                        <span class="text-gray-300 font-extrabold mr-1.5">${t.symbol}</span>
+                        <span class="text-white mr-1.5">$${t.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span class="${changeIsPositive ? 'text-emerald-400' : 'text-rose-400'} font-black">
+                            ${changeIsPositive ? '▲' : '▼'} ${t.change > 0 ? '+' : ''}${t.change}%
+                        </span>
+                    </span>
+                `;
+            });
+            strip.innerHTML = markup;
+        }
+
+        renderTape();
+
+        setInterval(() => {
+            tickers.forEach(t => {
+                const changePercent = (Math.random() - 0.49) * 0.1; 
+                t.price += t.price * (changePercent / 100);
+                t.change = parseFloat((t.change + changePercent).toFixed(2));
+            });
+            renderTape();
+        }, 3500);
+    }
+
+    function drawConsistencyCalendar() {
+        const grid = document.getElementById('heatmap-calendar-grid');
+        if (!grid) return;
+
+        grid.innerHTML = '';
+
+        const daysOfWeek = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+        daysOfWeek.forEach(day => {
+            const h = document.createElement('div');
+            h.className = "text-[9px] font-extrabold text-gray-500 tracking-wider mb-2 select-none";
+            h.innerText = day;
+            grid.appendChild(h);
+        });
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth(); 
+
+        const firstDayOfMonth = new Date(year, month, 1);
+        let startDayIndex = firstDayOfMonth.getDay(); 
+        startDayIndex = startDayIndex === 0 ? 6 : startDayIndex - 1;
+
+        const totalDays = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 0; i < startDayIndex; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = "h-10 bg-transparent";
+            grid.appendChild(emptyCell);
+        }
+
+        const dailySummaryMap = {};
+        pnlLogs.forEach(log => {
+            const logDateObj = new Date(log.date);
+            if (logDateObj.getFullYear() === year && logDateObj.getMonth() === month) {
+                const dayNum = logDateObj.getDate();
+                dailySummaryMap[dayNum] = (dailySummaryMap[dayNum] || 0) + parseFloat(log.amount);
+            }
+        });
+
+        for (let dayNum = 1; dayNum <= totalDays; dayNum++) {
+            const cell = document.createElement('div');
+            const totalPnL = dailySummaryMap[dayNum];
+            
+            let bgStyle = "bg-gray-800/20 text-gray-500 border border-darkBorder/40";
+            let pnlMarkup = "";
+
+            if (totalPnL !== undefined) {
+                if (totalPnL > 0) {
+                    bgStyle = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                    pnlMarkup = `<span class="block text-[8px] font-black mt-0.5 truncate text-emerald-300">+$${Math.abs(Math.round(totalPnL))}</span>`;
+                } else if (totalPnL < 0) {
+                    bgStyle = "bg-rose-500/10 text-rose-400 border border-rose-500/20";
+                    pnlMarkup = `<span class="block text-[8px] font-black mt-0.5 truncate text-rose-300">-$${Math.abs(Math.round(totalPnL))}</span>`;
+                } else {
+                    bgStyle = "bg-gray-800 text-gray-300 border border-darkBorder";
+                    pnlMarkup = `<span class="block text-[8px] font-extrabold mt-0.5 text-gray-500">Flat</span>`;
+                }
+            }
+
+            const isToday = (dayNum === today.getDate() && month === today.getMonth() && year === today.getFullYear());
+            const todayRing = isToday ? 'ring-2 ring-indigo-500' : '';
+
+            cell.className = `h-10 rounded-xl flex flex-col justify-center items-center transition cursor-help select-none ${bgStyle} ${todayRing}`;
+            cell.title = totalPnL !== undefined ? `Date: ${month+1}/${dayNum} - Total P&L: $${totalPnL.toFixed(2)}` : `No trade recorded on this day`;
+            cell.innerHTML = `
+                <span class="text-[10px] font-black">${dayNum}</span>
+                ${pnlMarkup}
+            `;
+            grid.appendChild(cell);
+        }
+    }
+
+    window.openFlexCardModal = function(logId) {
+        const log = pnlLogs.find(l => l.id === logId);
+        if (!log) return;
+
+        document.getElementById('flex-card-pnl').innerText = formatCurrency(log.amount);
+        document.getElementById('flex-card-pnl').className = `text-4xl font-black tracking-tight ${log.amount >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        document.getElementById('flex-card-asset').innerText = log.asset;
+        document.getElementById('flex-card-notes').innerText = log.notes ? `"${log.notes}"` : '"No verification notes logged."';
+        document.getElementById('flex-card-trader').innerText = log.username;
+        document.getElementById('flex-card-uuid').innerText = logId.substring(0, 8).toUpperCase();
+        document.getElementById('flex-card-timestamp').innerText = log.date.replace(/-/g, '/');
+
+        document.getElementById('modal-flex-card').classList.remove('hidden');
+    };
+
+    window.closeFlexCardModal = function() {
+        document.getElementById('modal-flex-card').classList.add('hidden');
+    };
+
+    window.copyFlexCardClipboard = function() {
+        const uuid = document.getElementById('flex-card-uuid').innerText;
+        const copyText = `SyncPL Shared Ledger Certificate: Code: #${uuid} | Profit logged: ${document.getElementById('flex-card-pnl').innerText} on ${document.getElementById('flex-card-asset').innerText} by ${document.getElementById('flex-card-trader').innerText}. Verified in Room Code: ${userGroupId}!`;
+        
+        const input = document.createElement('input');
+        input.value = copyText;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+
+        showToast("Card Shared", "SyncPL verification certificate copy saved to clipboard!", "success");
+        closeFlexCardModal();
+    };
+
+    window.exportLedgerToCSV = function() {
+        if (pnlLogs.length === 0) {
+            showToast("No Data", "No transaction logs available inside this room to export.", "error");
+            return;
+        }
+
+        let csvContent = "data:text/csv;charset=utf-8,Date,Trader,Asset,Strategy/Notes,P&L Amount,Status\n";
+
+        pnlLogs.forEach(log => {
+            const status = log.amount >= 0 ? "Profit" : "Loss";
+            const cleanedNotes = log.notes ? log.notes.replace(/"/g, '""') : "";
+            csvContent += `"${log.date}","${log.username}","${log.asset}","${cleanedNotes}",${log.amount},"${status}"\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `SyncPL-Ledger-${userGroupId}-${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast("Ledger Exported", "CSV downloaded successfully.", "success");
+    };
+
+    function calculateGlobalStats() {
+        const myLogs = pnlLogs.filter(log => log.userId === currentUser.uid);
+        
+        let dailySum = 0;
+        let weeklySum = 0;
+        let monthlySum = 0;
+        let wins = 0;
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const currentYearMonth = todayStr.substring(0, 7); 
+        
+        const d = new Date();
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        const mondayStr = new Date(d.setDate(diff)).toISOString().split('T')[0];
+
+        myLogs.forEach(entry => {
+            const amount = parseFloat(entry.amount);
+            if (entry.amount >= 0) wins++;
+            
+            if (entry.date === todayStr) {
+                dailySum += amount;
+            }
+            if (entry.date >= mondayStr) {
+                weeklySum += amount;
+            }
+            if (entry.date.startsWith(currentYearMonth)) {
+                monthlySum += amount;
+            }
+        });
+
+        const totalTrades = myLogs.length;
+        const winPercent = totalTrades > 0 ? Math.round((wins / totalTrades) * 100) : 0;
+
+        updateMetricText('metric-daily-pnl', dailySum);
+        updateMetricText('metric-weekly-pnl', weeklySum);
+        updateMetricText('metric-monthly-pnl', monthlySum);
+
+        document.getElementById('metric-daily-sub').innerText = `${myLogs.filter(e => e.date === todayStr).length} trades logged`;
+        document.getElementById('metric-weekly-sub').innerText = `Mon. to Sun. activity`;
+        document.getElementById('metric-monthly-sub').innerText = `Month aggregate ledger`;
+
+        document.getElementById('metric-win-rate').innerText = `${winPercent}%`;
+        document.getElementById('metric-win-rate').className = `text-3xl font-black ${winPercent >= 50 ? 'text-emerald-400' : 'text-rose-400'}`;
+        document.getElementById('metric-trades-count').innerText = `${totalTrades} total setups`;
+
+        const winBar = document.getElementById('win-rate-bar');
+        if (winBar) {
+            winBar.style.width = `${winPercent}%`;
+            if (winPercent >= 50) {
+                winBar.className = "bg-emerald-400 h-full rounded-full transition-all duration-500";
+            } else {
+                winBar.className = "bg-rose-500 h-full rounded-full transition-all duration-500";
+            }
+        }
+    }
+
+    function updateMetricText(elementId, value) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        const formatted = formatCurrency(value);
+        el.innerText = formatted;
+        
+        if (value > 0) {
+            el.className = "text-3xl font-black text-emerald-400 tracking-tight";
+        } else if (value < 0) {
+            el.className = "text-3xl font-black text-rose-500 tracking-tight";
+        } else {
+            el.className = "text-3xl font-black text-gray-200 tracking-tight";
+        }
+    }
+
+    function formatCurrency(val) {
+        const sign = val < 0 ? "-" : "";
+        return `${sign}$${Math.abs(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    // Dynamic Voice Synthesis / Gemini Text-To-Speech Interface
+    async function playTextToSpeech(speechText) {
+        if (isAiSpeaking && currentSpeechAudio) {
+            currentSpeechAudio.pause();
+        }
+
+        const voiceName = document.getElementById('tts-voice-selection').value || "Kore";
+        const styleInstructions = document.getElementById('tts-vocal-prompt').value || "Speak critically like a risk manager";
+        const fullPromptText = `Say: ${styleInstructions}. Here is the report message: "${speechText}"`;
+
+        try {
+            isAiSpeaking = true;
+            const payload = {
+                contents: [{
+                    parts: [{ text: fullPromptText }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: voiceName }
+                        }
+                    }
+                }
+            };
+
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            const part = result?.candidates?.[0]?.content?.parts?.[0];
+            const audioData = part?.inlineData?.data;
+            const mimeType = part?.inlineData?.mimeType;
+
+            if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+                
+                const pcmData = base64ToArrayBuffer(audioData);
+                const pcm16 = new Int16Array(pcmData);
+                const wavBlob = pcmToWav(pcm16, sampleRate);
+                const audioUrl = URL.createObjectURL(wavBlob);
+
+                currentSpeechAudio = new Audio(audioUrl);
+                currentSpeechAudio.play();
+                
+                currentSpeechAudio.onended = () => {
+                    isAiSpeaking = false;
+                };
+            }
+        } catch (e) {
+            console.error("Gemini TTS engine error:", e);
+        }
+    }
+
+    function base64ToArrayBuffer(base64) {
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
+
+    function pcmToWav(pcm16, sampleRate) {
+        const buffer = new ArrayBuffer(44 + pcm16.length * 2);
+        const view = new DataView(buffer);
+        
+        writeString(view, 0, 'RIFF');
+        view.setUint32(4, 36 + pcm16.length * 2, true);
+        writeString(view, 8, 'WAVE');
+        writeString(view, 12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true); 
+        view.setUint16(22, 1, true); 
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 2, true); 
+        view.setUint16(32, 2, true); 
+        view.setUint16(34, 16, true); 
+        writeString(view, 36, 'data');
+        view.setUint32(40, pcm16.length * 2, true);
+        
+        let offset = 44;
+        for (let i = 0; i < pcm16.length; i++, offset += 2) {
+            view.setInt16(offset, pcm16[i], true);
+        }
+        return new Blob([view], { type: 'audio/wav' });
+    }
+
+    function writeString(view, offset, string) {
+        for (let i = 0; i < string.length; i++) {
+            view.setUint8(offset + i, string.charCodeAt(i));
+        }
+    }
+
+    function drawActivityFeed() {
+        const feedContainer = document.getElementById('activity-feed');
+        if (!feedContainer) return;
+
+        if (pnlLogs.length === 0) {
+            feedContainer.innerHTML = `<p class="text-sm text-gray-500 text-center py-8">Waiting for ledger sync entries...</p>`;
+            return;
+        }
+
+        const recentLogs = pnlLogs.slice(0, 15);
+        feedContainer.innerHTML = '';
+
+        recentLogs.forEach(entry => {
+            const isProfit = entry.amount >= 0;
+            const amountStr = formatCurrency(entry.amount);
+            const entryTime = entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Sync';
+            
+            const card = document.createElement('div');
+            card.className = "flex items-start justify-between p-3.5 bg-darkCard/40 border border-darkBorder/40 rounded-xl space-x-3 shadow-sm hover:border-indigo-500/20 hover:bg-darkCard/75 transition duration-300";
+            card.innerHTML = `
+                <div class="flex items-start space-x-3 min-w-0">
+                    <div class="p-2.5 rounded-xl shrink-0 ${isProfit ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
+                        <i data-lucide="${isProfit ? 'arrow-up-right' : 'arrow-down-left'}" class="w-4.5 h-4.5"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold text-gray-200 truncate"><span class="text-indigo-400 font-extrabold">${escapeHTML(entry.username)}</span> logged ${escapeHTML(entry.asset)}</p>
+                        <p class="text-[10px] text-gray-500 font-medium truncate mt-0.5">${escapeHTML(entry.notes) || 'No notes left'}</p>
+                    </div>
+                </div>
+                <div class="text-right shrink-0">
+                    <p class="text-xs font-bold ${isProfit ? 'text-emerald-400' : 'text-rose-400'}">${amountStr}</p>
+                    <p class="text-[9px] text-gray-500 font-extrabold uppercase mt-0.5 font-mono">${entryTime}</p>
+                </div>
+            `;
+            feedContainer.appendChild(card);
+        });
+        lucide.createIcons();
+    }
+
+    function drawLeaderboard() {
+        const tbody = document.getElementById('leaderboard-table-body');
+        if (!tbody) return;
+
+        const ranks = groupSummaries.map(userSum => {
+            let metricVal = 0;
+            if (currentLeaderboardPeriod === 'daily') metricVal = userSum.daily_pl || 0;
+            else if (currentLeaderboardPeriod === 'weekly') metricVal = userSum.weekly_pl || 0;
+            else if (currentLeaderboardPeriod === 'monthly') metricVal = userSum.monthly_pl || 0;
+
+            return {
+                ...userSum,
+                sortValue: metricVal
+            };
+        });
+
+        ranks.sort((a, b) => b.sortValue - a.sortValue);
+
+        tbody.innerHTML = '';
+        if (ranks.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">
+                        No partners matched this synchronized workspace profile yet.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        ranks.forEach((trader, index) => {
+            const rankNum = index + 1;
+            let rankBadgeClass = "bg-gray-800 text-gray-400";
+            if (rankNum === 1) rankBadgeClass = "bg-amber-500/15 text-amber-400 border border-amber-500/30";
+            else if (rankNum === 2) rankBadgeClass = "bg-slate-300/15 text-slate-300 border border-slate-300/30";
+            else if (rankNum === 3) rankBadgeClass = "bg-amber-800/15 text-amber-700 border border-amber-800/30";
+
+            const profitStyle = trader.sortValue > 0 ? 'text-emerald-400 font-extrabold' : (trader.sortValue < 0 ? 'text-rose-500 font-extrabold' : 'text-gray-400');
+            const traderAvatarMarkup = renderAvatarHTML(trader.avatarType, trader.avatarVal, trader.avatarColor, trader.username, 8);
+
+            const isAdmin = trader.userId === roomAdminId;
+            const isMod = roomMods.includes(trader.userId);
+            
+            let badgeMarkup = '';
+            if (isAdmin) {
+                badgeMarkup = `
+                    <span class="ml-1.5 inline-flex items-center text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/20 px-1.5 py-0.2 rounded font-extrabold uppercase font-mono">
+                        👑 Admin
+                    </span>
+                `;
+            } else if (isMod) {
+                badgeMarkup = `
+                    <span class="ml-1.5 inline-flex items-center text-[9px] bg-sky-500/15 text-sky-400 border border-sky-500/20 px-1.5 py-0.2 rounded font-extrabold uppercase font-mono">
+                        🛡️ Mod
+                    </span>
+                `;
+            }
+
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-darkBg/30 transition duration-150";
+            tr.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${rankBadgeClass}">
+                        ${rankNum}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center space-x-3">
+                        ${traderAvatarMarkup}
+                        <div>
+                            <div class="flex items-center">
+                                <span class="text-sm font-semibold text-gray-200 block">${escapeHTML(trader.username)}</span>
+                                ${badgeMarkup}
+                            </div>
+                            <span class="text-[9px] text-gray-500 font-mono">${trader.userId}</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-300">
+                    ${trader.trades_logged || 0}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                    <span class="${trader.win_rate >= 50 ? 'text-emerald-400' : 'text-rose-400'}">
+                        ${trader.win_rate || 0}%
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                    <span class="${profitStyle}">${formatCurrency(trader.sortValue)}</span>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function drawLogsTable() {
+        const tbody = document.getElementById('logs-table-body');
+        const emptyState = document.getElementById('logs-empty-state');
+        if (!tbody) return;
+
+        let filtered = pnlLogs;
+        if (logScope === 'me') {
+            filtered = pnlLogs.filter(log => log.userId === currentUser.uid);
+        }
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+        tbody.innerHTML = '';
+
+        filtered.forEach(log => {
+            const isProfit = log.amount >= 0;
+            const amtStr = formatCurrency(log.amount);
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-darkBg/30 transition duration-150";
+            
+            const isOwner = currentUser && log.userId === currentUser.uid;
+            
+            const flexBtn = `<button onclick="openFlexCardModal('${log.id}')" class="p-1.5 text-gray-500 hover:text-indigo-400 transition rounded-lg hover:bg-indigo-500/10 mr-1" title="Generate Shareable Flex Card">
+                <i data-lucide="award" class="w-4 h-4"></i>
+            </button>`;
+
+            const actionBtn = isOwner ? 
+                `<div class="flex items-center justify-end">${flexBtn}<button onclick="deleteTradeLogConfirm('${log.id}', '${log.asset}', ${log.amount})" class="p-1.5 text-gray-500 hover:text-rose-500 transition rounded-lg hover:bg-rose-500/10" title="Delete Log Entry">
+                    <i data-lucide="trash" class="w-4 h-4"></i>
+                </button></div>` : 
+                `<div class="flex items-center justify-end">${flexBtn}<span class="text-[10px] text-gray-600 font-semibold italic select-none">Shared</span></div>`;
+
+            tr.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400 font-medium">
+                    ${log.date}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm font-semibold text-gray-300">${escapeHTML(log.username)}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold uppercase bg-indigo-950/40 text-indigo-400 border border-indigo-800/20">
+                        ${escapeHTML(log.asset)}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-400 max-w-xs truncate" title="${escapeHTML(log.notes)}">
+                    ${escapeHTML(log.notes) || '<span class="text-gray-600 italic">No description</span>'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold">
+                    <span class="${isProfit ? 'text-emerald-400' : 'text-rose-500'}">
+                        ${isProfit ? '+' : ''}${amtStr}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                    ${actionBtn}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        lucide.createIcons();
+    }
+
+    function drawSyncChart() {
+        const canvas = document.getElementById('pnlHistoryChart');
+        if (!canvas) return;
+
+        if (performanceChart) {
+            performanceChart.destroy();
+        }
+
+        const dateSet = new Set();
+        pnlLogs.forEach(log => dateSet.add(log.date));
+        const dates = Array.from(dateSet).sort((a, b) => new Date(a) - new Date(b));
+
+        const datasets = [];
+        const usersInRoom = Array.from(new Set(pnlLogs.map(log => log.userId)));
+
+        const colors = [
+            { line: '#6366f1', fill: 'rgba(99, 102, 241, 0.05)' }, 
+            { line: '#ec4899', fill: 'rgba(236, 72, 153, 0.05)' }, 
+            { line: '#10b981', fill: 'rgba(16, 185, 129, 0.05)' }, 
+            { line: '#f59e0b', fill: 'rgba(245, 158, 11, 0.05)' },  
+            { line: '#8b5cf6', fill: 'rgba(139, 92, 246, 0.05)' }  
+        ];
+
+        usersInRoom.forEach((uId, colorIdx) => {
+            const userLogs = pnlLogs.filter(log => log.userId === uId).sort((a, b) => new Date(a.date) - new Date(b.date));
+            if (userLogs.length === 0) return;
+
+            const name = userLogs[0].username || uId.substring(0, 6);
+            const dataPoints = [];
+            let cumulativeVal = 0;
+
+            dates.forEach(date => {
+                const logsOnDate = userLogs.filter(log => log.date === date);
+                if (logsOnDate.length > 0) {
+                    logsOnDate.forEach(log => {
+                        cumulativeVal += parseFloat(log.amount);
+                    });
+                }
+                dataPoints.push(cumulativeVal);
+            });
+
+            const colObj = colors[colorIdx % colors.length];
+
+            datasets.push({
+                label: name,
+                data: dataPoints,
+                borderColor: colObj.line,
+                backgroundColor: colObj.fill,
+                borderWidth: 3,
+                tension: 0.35,
+                fill: true,
+                pointBackgroundColor: colObj.line,
+                pointBorderColor: '#060913',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            });
+        });
+
+        if (datasets.length === 0) {
+            datasets.push({
+                label: "Waiting for Sync",
+                data: [0, 0, 0, 0, 0],
+                borderColor: '#4b5563',
+                backgroundColor: 'rgba(75, 85, 99, 0.05)',
+                borderWidth: 1,
+                tension: 0.1,
+                fill: true
+            });
+        }
+
+        const labels = dates.length > 0 ? dates : ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5"];
+
+        performanceChart = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.03)', borderColor: 'transparent' },
+                        ticks: { color: '#9ca3af', font: { family: 'Inter', size: 10 } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.03)', borderColor: 'transparent' },
+                        ticks: {
+                            color: '#9ca3af',
+                            font: { family: 'Inter', size: 10 },
+                            callback: function(value) {
+                                return value >= 0 ? '$' + value : '-$' + Math.abs(value);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: '#f3f4f6', font: { family: 'Inter', size: 11, weight: '700' } }
+                    }
+                }
+            }
+        });
+    }
+
+    function drawWorkspaceChat() {
+        const chatContainer = document.getElementById('chat-messages-container');
+        if (!chatContainer) return;
+
+        const currentChanMsgs = chatMessages.filter(msg => msg.channel === activeChatChannel);
+
+        if (currentChanMsgs.length === 0) {
+            chatContainer.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full py-16 text-gray-500">
+                    <i data-lucide="message-square" class="w-12 h-12 text-gray-700 mb-2"></i>
+                    <p class="text-sm font-bold">#${activeChatChannel} is empty</p>
+                    <p class="text-xs text-center px-4">Send the first packet to initiate trading conversation here!</p>
+                </div>
+            `;
+            lucide.createIcons();
+            return;
+        }
+
+        chatContainer.innerHTML = '';
+        currentChanMsgs.forEach(msg => {
+            const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+            const isSystemOrEmbed = msg.isEmbed === true;
+            
+            const msgEl = document.createElement('div');
+            msgEl.className = "flex items-start space-x-3 group animate-in fade-in slide-in-from-bottom-2 duration-250";
+            
+            if (isSystemOrEmbed) {
+                msgEl.innerHTML = `
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shrink-0 shadow">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-sm text-indigo-400">SyncPL Ledger Bot</span>
+                            <span class="text-[9px] text-gray-500 font-medium font-mono">${timeStr}</span>
+                        </div>
+                        <div class="mt-1.5 p-4 bg-indigo-950/40 border border-indigo-500/30 rounded-xl max-w-sm shadow-md">
+                            <p class="text-[10px] text-indigo-300 font-bold mb-2 uppercase tracking-widest">🚨 LEDGER SYNC EVENT</p>
+                            <h4 class="text-sm font-bold text-white mb-1">
+                                <span class="text-indigo-300">${escapeHTML(msg.username)}</span> logged a position
+                            </h4>
+                            <div class="flex items-center space-x-2 mt-2">
+                                <span class="px-2 py-0.5 rounded bg-gray-900 text-xs font-mono font-bold text-gray-300 border border-gray-800">${escapeHTML(msg.asset)}</span>
+                                <span class="font-bold text-sm ${msg.amount >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+                                    ${msg.amount >= 0 ? '+' : ''}${formatCurrency(msg.amount)}
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-gray-400 mt-2 italic">"${escapeHTML(msg.notes) || 'No notes left'}"</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const chatAvatarMarkup = renderAvatarHTML(msg.avatarType, msg.avatarVal, msg.avatarColor, msg.username, 9);
+
+                msgEl.innerHTML = `
+                    ${chatAvatarMarkup}
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-sm text-gray-200">${escapeHTML(msg.username)}</span>
+                            <span class="text-[9px] text-gray-500 font-medium font-mono">${timeStr}</span>
+                        </div>
+                        <p class="text-sm text-gray-300 mt-0.5 leading-relaxed break-all">${escapeHTML(msg.text)}</p>
+                    </div>
+                `;
+            }
+            chatContainer.appendChild(msgEl);
+        });
+
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        lucide.createIcons();
+        drawActiveChatPartners();
+    }
+
+    window.toggleModerator = async function(targetUserId, targetUsername) {
+        if (!currentUser || roomAdminId !== currentUser.uid) {
+            showToast("Admin Only", "Only the room admin can promote moderators.", "error");
+            return;
+        }
+        if (targetUserId === roomAdminId) {
+            showToast("Action Blocked", "You are the admin of this room.", "error");
+            return;
+        }
+
+        const roomMetaRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', userGroupId);
+        const isMod = roomMods.includes(targetUserId);
+        let updatedMods = [...roomMods];
+
+        if (isMod) {
+            updatedMods = updatedMods.filter(uid => uid !== targetUserId);
+            showToast("Mod Demoted", `${targetUsername} is no longer a Moderator.`, "info");
+        } else {
+            updatedMods.push(targetUserId);
+            showToast("Mod Promoted", `${targetUsername} is now a Moderator!`, "success");
+        }
+
+        try {
+            await updateDoc(roomMetaRef, { moderators: updatedMods });
+        } catch (err) {
+            console.error("Failed to update moderators:", err);
+            showToast("Sync Error", "Could not synchronize moderator update.", "error");
+        }
+    };
+
+    function drawActiveChatPartners() {
+        const partnersList = document.getElementById('chat-partners-list');
+        if (!partnersList) return;
+
+        partnersList.innerHTML = '';
+        if (groupSummaries.length === 0) {
+            partnersList.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">Alone in room</p>`;
+            return;
+        }
+
+        groupSummaries.forEach(trader => {
+            const voiceMatch = voiceUsers.find(v => v.userId === trader.userId);
+            const isUserInVoice = !!voiceMatch;
+            const partnerAvatarMarkup = renderAvatarHTML(trader.avatarType, trader.avatarVal, trader.avatarColor, trader.username, 8);
+
+            const isAdmin = trader.userId === roomAdminId;
+            const isTraderMod = roomMods.includes(trader.userId);
+            
+            let iconMarkup = '';
+            if (isAdmin) {
+                iconMarkup = `<span class="text-amber-400 self-center" title="Workspace Owner (Admin)"><i data-lucide="crown" class="w-3.5 h-3.5"></i></span>`;
+            } else if (isTraderMod) {
+                iconMarkup = `<span class="text-sky-400 self-center" title="Workspace Moderator"><i data-lucide="shield" class="w-3.5 h-3.5"></i></span>`;
+            }
+
+            const showModButton = (currentUser && roomAdminId === currentUser.uid && trader.userId !== roomAdminId);
+            const modActionBtn = showModButton ? `
+                <button onclick="toggleModerator('${trader.userId}', '${escapeHTML(trader.username)}')" class="p-1 hover:bg-gray-800 rounded transition ${isTraderMod ? 'text-sky-400' : 'text-gray-600 hover:text-sky-400'}" title="${isTraderMod ? 'Demote Mod' : 'Promote to Mod'}">
+                    <i data-lucide="${isTraderMod ? 'shield-minus' : 'shield-plus'}" class="w-3.5 h-3.5"></i>
+                </button>
+            ` : '';
+
+            const card = document.createElement('div');
+            card.className = "flex items-center justify-between p-1 hover:bg-gray-800/40 rounded transition";
+            card.innerHTML = `
+                <div class="flex items-center space-x-2 min-w-0">
+                    <div class="relative">
+                        ${partnerAvatarMarkup}
+                        <span class="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-emerald-400 ring-1 ring-gray-900"></span>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1">
+                            <span class="text-xs font-semibold text-gray-200 block truncate">${escapeHTML(trader.username)}</span>
+                            ${iconMarkup}
+                        </div>
+                        <span class="text-[8px] text-gray-500 block truncate font-mono">${trader.userId}</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-1 shrink-0">
+                    ${modActionBtn}
+                    ${isUserInVoice ? `
+                        <span class="text-emerald-400 shrink-0 animate-pulse" title="In Voice Room">
+                            <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+                        </span>
+                    ` : ''}
+                </div>
+            `;
+            partnersList.appendChild(card);
+        });
+        lucide.createIcons();
+    }
+
+    window.handleChatSubmit = async function(event) {
+        event.preventDefault();
+        if (!currentUser) return;
+
+        const input = document.getElementById('chat-message-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+
+        try {
+            const chatCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'chat_messages');
+            await addDoc(chatCollectionRef, {
+                userId: currentUser.uid,
+                username: localUsername,
+                avatarColor: userAvatarColor,
+                avatarType: userAvatarType,
+                avatarVal: userAvatarVal,
+                groupId: userGroupId,
+                text: text,
+                channel: activeChatChannel,
+                timestamp: new Date().toISOString()
+            });
+        } catch (err) {
+            console.error("Chat dispatch failure: ", err);
+        }
+    };
+
+    window.selectChatChannel = function(chanName, type) {
+        activeChatChannel = chanName;
+        activeChatChannelType = type;
+        
+        document.getElementById('active-chat-channel-title').innerText = chanName;
+        document.getElementById('channel-type-badge').innerText = type === 'text' ? 'Text Channel' : 'Voice Desk';
+        
+        drawDynamicChannelsUI();
+        drawWorkspaceChat();
+    };
+
+    window.toggleVoiceRoom = async function(roomName) {
+        if (activeVoiceChannel === roomName) {
+            await disconnectVoice();
+            return;
+        }
+
+        if (activeVoiceChannel) {
+            await disconnectVoice();
+        }
+
+        activeVoiceChannel = roomName;
+        showToast("Voice Desk Joining", `Dialing voice channel: ${roomName}...`, "info");
+
+        const isAi = roomName.includes("🤖") || roomName.toLowerCase().includes("ai");
+        if (isAi) {
+            await connectToAiRiskAdvisor();
+            return;
+        }
+
+        await joinWebRtcVoiceRoom(roomName);
+    };
+
+    async function joinWebRtcVoiceRoom(roomName) {
+        try {
+            try {
+                userMediaStream = await navigator.mediaDevices.getUserMedia({
+                    audio: { echoCancellation: true, noiseSuppression: true }
+                });
+            } catch (mediaError) {
+                console.warn("Iframe mic error: using simulated signals");
+            }
+
+            const voiceUserDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'voice_users', currentUser.uid);
+            await setDoc(voiceUserDocRef, {
+                userId: currentUser.uid,
+                username: localUsername,
+                groupId: userGroupId,
+                channel: roomName,
+                muted: isMuted,
+                deafened: isDeafened,
+                speaking: false,
+                joinedAt: new Date().toISOString()
+            });
+
+            const led = document.getElementById('voice-status-led');
+            const statusMsg = document.getElementById('voice-status-msg');
+            const disconnectBtn = document.getElementById('voice-disconnect-btn');
+            
+            if (led) led.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
+            if (statusMsg) {
+                statusMsg.innerText = "Connected Voice Desk";
+                statusMsg.className = "font-bold text-emerald-400";
+            }
+            if (disconnectBtn) disconnectBtn.classList.remove('hidden');
+
+            showToast("Connected", `Entered 🔊 ${roomName} successfully.`, "success");
+            drawDynamicChannelsUI();
+
+        } catch (e) {
+            console.error("Voice room assignment failure: ", e);
+            showToast("Connection Fail", "Handshake timed out", "error");
+        }
+    }
+
+    async function connectToAiRiskAdvisor() {
+        const led = document.getElementById('voice-status-led');
+        const statusMsg = document.getElementById('voice-status-msg');
+        const disconnectBtn = document.getElementById('voice-disconnect-btn');
+        
+        if (led) led.className = "w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse";
+        if (statusMsg) {
+            statusMsg.innerText = "🤖 AI Risk Agent";
+            statusMsg.className = "font-bold text-pink-400";
+        }
+        if (disconnectBtn) disconnectBtn.classList.remove('hidden');
+
+        drawDynamicChannelsUI();
+
+        const responseText = "Greetings. I am your risk manager voice synthesis assistant. I am analyzing your custom channels and ledger logs in real-time. Feel free to run a test speak sequence!";
+        await playTextToSpeech(responseText);
+
+        const chatCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'chat_messages');
+        await addDoc(chatCollectionRef, {
+            userId: 'ai-system-assistant',
+            username: '🤖 Voice Co-Pilot',
+            avatarColor: 'pink',
+            groupId: userGroupId,
+            text: responseText,
+            channel: activeChatChannel,
+            timestamp: new Date().toISOString()
+        });
+    }
+
+    window.disconnectVoice = async function() {
+        if (!currentUser) return;
+
+        try {
+            const voiceUserDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'voice_users', currentUser.uid);
+            await deleteDoc(voiceUserDocRef);
+
+            if (userMediaStream) {
+                userMediaStream.getTracks().forEach(track => track.stop());
+                userMediaStream = null;
+            }
+            if (currentSpeechAudio) {
+                currentSpeechAudio.pause();
+                currentSpeechAudio = null;
+            }
+        } catch (e) {
+            console.error("Graceful exit sequence skipped", e);
+        }
+
+        const led = document.getElementById('voice-status-led');
+        const statusMsg = document.getElementById('voice-status-msg');
+        const disconnectBtn = document.getElementById('voice-disconnect-btn');
+        
+        if (led) led.className = "w-2.5 h-2.5 rounded-full bg-gray-600";
+        if (statusMsg) {
+            statusMsg.innerText = "Voice Off";
+            statusMsg.className = "font-bold text-gray-400";
+        }
+        if (disconnectBtn) disconnectBtn.classList.add('hidden');
+
+        activeVoiceChannel = null;
+        showToast("Disconnected", "Voice channels safely closed.", "info");
+        drawDynamicChannelsUI();
+    };
+
+    function drawVoiceConnectedUsersPanel() {
+        const listContainer = document.getElementById('voice-connected-users');
+        if (!listContainer) return;
+
+        listContainer.innerHTML = '';
+        const roomPeers = voiceUsers.filter(v => v.channel === activeVoiceChannel);
+
+        if (roomPeers.length === 0) {
+            listContainer.innerHTML = `<p class="text-[10px] text-gray-500 italic">No participants connected</p>`;
+            return;
+        }
+
+        roomPeers.forEach(peer => {
+            const isSpeaking = peer.speaking === true;
+            const item = document.createElement('div');
+            item.className = "flex items-center justify-between py-1 px-1.5 rounded bg-gray-900/40 text-[11px] border border-gray-800/30 font-mono";
+            
+            item.innerHTML = `
+                <div class="flex items-center space-x-2 truncate">
+                    <span class="w-1.5 h-1.5 rounded-full ${isSpeaking ? 'bg-emerald-400 animate-pulse' : 'bg-gray-600'}"></span>
+                    <span class="font-semibold text-gray-300 truncate">${escapeHTML(peer.username)}</span>
+                </div>
+                <div class="flex items-center space-x-1 shrink-0">
+                    ${isSpeaking ? `
+                        <div class="flex items-center space-x-[2px] h-4 pr-1 shrink-0">
+                            <div class="w-[2px] h-2 bg-emerald-400 rounded voice-bar"></div>
+                            <div class="w-[2px] h-3 bg-emerald-400 rounded voice-bar"></div>
+                            <div class="w-[2px] h-1 bg-emerald-400 rounded voice-bar"></div>
+                        </div>
+                    ` : ''}
+                    ${peer.muted ? `<i data-lucide="mic-off" class="w-3 h-3 text-rose-400 shrink-0"></i>` : ''}
+                    ${peer.deafened ? `<i data-lucide="volume-x" class="w-3 h-3 text-rose-400 shrink-0"></i>` : ''}
+                </div>
+            `;
+            listContainer.appendChild(item);
+        });
+        lucide.createIcons();
+    }
+
+    function updateVoiceChannelHeadcounts() {
+        drawDynamicChannelsUI();
+    }
+
+    window.triggerVoiceSpeakSim = async function() {
+        if (!activeVoiceChannel) {
+            showToast("Not Connected", "Join a voice channel to test the speech engine.", "error");
+            return;
+        }
+
+        try {
+            const voiceUserDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'voice_users', currentUser.uid);
+            await updateDoc(voiceUserDocRef, { speaking: true });
+
+            const isAi = activeVoiceChannel.includes("🤖") || activeVoiceChannel.toLowerCase().includes("ai");
+            if (isAi) {
+                setTimeout(async () => {
+                    const quotes = [
+                        "Warning. Volatility indexes are spiking on SPY. Adjust stop loss models accordingly.",
+                        "Excellent win rate ratio this session! Keep leverage balanced.",
+                        "Your current cumulative curve indicates positive growth. Hold your steady posture.",
+                        "Market risk limits have been calculated. Maintain maximum 3% portfolio risk exposure."
+                    ];
+                    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+                    await playTextToSpeech(randomQuote);
+
+                    const chatCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'chat_messages');
+                    await addDoc(chatCollectionRef, {
+                        userId: 'ai-system-assistant',
+                        username: '🤖 Voice Co-Pilot',
+                        avatarColor: 'pink',
+                        groupId: userGroupId,
+                        text: `🗣️ Voice feedback: "${randomQuote}"`,
+                        channel: activeChatChannel,
+                        timestamp: new Date().toISOString()
+                    });
+                }, 1000);
+            } else {
+                showToast("Speaking", "Simulating your vocal audio stream inside room...", "success");
+            }
+
+            setTimeout(async () => {
+                await updateDoc(voiceUserDocRef, { speaking: false });
+            }, 3000);
+
+        } catch (e) {
+            console.error("Speak simulation error: ", e);
+        }
+    };
+
+    window.toggleMicrophone = async function() {
+        isMuted = !isMuted;
+        const btn = document.getElementById('btn-toggle-mic');
+        
+        if (isMuted) {
+            btn.className = "p-1 hover:bg-gray-800 rounded text-rose-400 transition bg-rose-950/20";
+            btn.innerHTML = `<i data-lucide="mic-off" class="w-4 h-4"></i>`;
+            showToast("Muted", "Microphone line disabled.", "info");
+        } else {
+            btn.className = "p-1 hover:bg-gray-800 rounded text-gray-200 transition";
+            btn.innerHTML = `<i data-lucide="mic" class="w-4 h-4"></i>`;
+            showToast("Unmuted", "Microphone signals active.", "success");
+        }
+        lucide.createIcons();
+
+        if (activeVoiceChannel) {
+            const voiceUserDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'voice_users', currentUser.uid);
+            await updateDoc(voiceUserDocRef, { muted: isMuted });
+        }
+    };
+
+    window.toggleDeafen = async function() {
+        isDeafened = !isDeafened;
+        const btn = document.getElementById('btn-toggle-deafen');
+        
+        if (isDeafened) {
+            btn.className = "p-1 hover:bg-gray-800 rounded text-rose-400 transition bg-rose-950/20";
+            btn.innerHTML = `<i data-lucide="volume-x" class="w-4 h-4"></i>`;
+            showToast("Deafened", "Listening lines stopped.", "info");
+        } else {
+            btn.className = "p-1 hover:bg-gray-800 rounded text-gray-200 transition";
+            btn.innerHTML = `<i data-lucide="volume-2" class="w-4 h-4"></i>`;
+            showToast("Undeafened", "Vocal listening re-enabled.", "success");
+        }
+        lucide.createIcons();
+
+        if (activeVoiceChannel) {
+            const voiceUserDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'voice_users', currentUser.uid);
+            await updateDoc(voiceUserDocRef, { deafened: isDeafened });
+        }
+    };
+
+    window.setLogType = function(isProfit) {
+        activeLogPnlType = isProfit;
+        const profBtn = document.getElementById('btn-toggle-profit');
+        const lossBtn = document.getElementById('btn-toggle-loss');
+        
+        if (isProfit) {
+            profBtn.className = "flex-grow py-3 bg-emerald-950/40 text-emerald-400 text-sm font-extrabold border-r border-darkBorder/60 transition duration-150";
+            lossBtn.className = "flex-grow py-3 bg-darkBg text-gray-500 text-sm font-semibold transition duration-150";
+        } else {
+            profBtn.className = "flex-grow py-3 bg-darkBg text-gray-500 text-sm font-semibold border-r border-darkBorder/60 transition duration-150";
+            lossBtn.className = "flex-grow py-3 bg-rose-950/40 text-rose-400 text-sm font-extrabold transition duration-150";
+        }
+    };
+
+    window.handleLogFormSubmit = async function(event) {
+        event.preventDefault();
+        if (!currentUser) return;
+
+        showLoader();
+
+        const amountVal = Math.abs(parseFloat(document.getElementById('pnl-amount-input').value));
+        const finalAmount = activeLogPnlType ? amountVal : -amountVal;
+        const dateVal = document.getElementById('pnl-date-input').value;
+        const assetVal = document.getElementById('pnl-asset-input').value.toUpperCase();
+        const notesVal = document.getElementById('pnl-notes-input').value;
+
+        try {
+            const logsCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'pnl_logs');
+            await addDoc(logsCollectionRef, {
+                userId: currentUser.uid,
+                username: localUsername,
+                groupId: userGroupId,
+                amount: finalAmount,
+                date: dateVal,
+                asset: assetVal,
+                notes: notesVal,
+                win: activeLogPnlType,
+                timestamp: new Date().toISOString()
+            });
+
+            await updatePublicUserSummary();
+
+            const chatCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'chat_messages');
+            await addDoc(chatCollectionRef, {
+                userId: currentUser.uid,
+                username: localUsername,
+                groupId: userGroupId,
+                text: `${localUsername} synced a new ledger position.`,
+                channel: "pnl-flex",
+                isEmbed: true,
+                amount: finalAmount,
+                asset: assetVal,
+                notes: notesVal,
+                timestamp: new Date().toISOString()
+            });
+
+            closeLogModal();
+            showToast("Sync Successful", `Logged $${Math.abs(finalAmount).toFixed(2)} on ${assetVal}.`, "success");
+            
+            document.getElementById('pnl-amount-input').value = '';
+            document.getElementById('pnl-notes-input').value = '';
+            document.getElementById('pnl-asset-input').value = '';
+        } catch (err) {
+            console.error("Write trade exception: ", err);
+            showToast("Sync Interrupted", "Check workspace link status.", "error");
+        } finally {
+            hideLoader();
+        }
+    };
+
+    window.deleteTradeLogConfirm = function(logId, asset, amount) {
+        showCustomConfirm(
+            "Delete Sync Record",
+            `Are you sure you want to delete the trade record on $${Math.abs(amount).toFixed(2)} for asset ${asset}? This action is irreversible.`,
+            async () => {
+                showLoader();
+                try {
+                    const logDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'pnl_logs', logId);
+                    await deleteDoc(logDocRef);
+
+                    await updatePublicUserSummary();
+                    showToast("Record Deleted", "Ledger updated across all group mirrors.", "info");
+                } catch (err) {
+                    console.error("Delete exception: ", err);
+                    showToast("Action Forbidden", "Unable to remove selected entry", "error");
+                } finally {
+                    hideLoader();
+                }
+            }
+        );
+    };
+
+    window.setAvatarColor = function(color) {
+        userAvatarColor = color;
+        document.querySelectorAll('#profile-color-selector button').forEach(btn => {
+            btn.classList.remove('border-white', 'ring-2');
+        });
+        const activeBtn = document.getElementById(`col-${color}`);
+        if (activeBtn) activeBtn.classList.add('border-white', 'ring-2');
+    };
+
+    window.saveWorkspaceProfile = async function() {
+        const usernameField = document.getElementById('settings-username-input');
+        const usernameVal = usernameField.value.trim();
+        if (!usernameVal) return;
+
+        showLoader();
+        localUsername = usernameVal;
+
+        try {
+            // RULE 1 COMPLIANCE: 6 segments document save
+            const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'info');
+            await setDoc(profileRef, { 
+                username: localUsername,
+                avatarColor: userAvatarColor,
+                avatarType: userAvatarType,
+                avatarVal: userAvatarVal
+            }, { merge: true });
+
+            await updatePublicUserSummary();
+            updateDisplayValues();
+            showToast("Profile Synced", `Alias updated to ${localUsername}.`, "success");
+        } catch (e) {
+            console.error("Profile update failed:", e);
+        } finally {
+            hideLoader();
+        }
+    };
+
+    window.triggerMainMenuCreate = async function() {
+        const usernameField = document.getElementById('menu-username-input');
+        const usernameVal = usernameField.value.trim() || `Trader_${currentUser.uid.substring(0, 5)}`;
+        
+        showLoader();
+        localUsername = usernameVal;
+        const newCode = generateRandomRoomCode();
+        userGroupId = newCode;
+
+        try {
+            // RULE 1 COMPLIANCE: 6 segments document save
+            const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'info');
+            await setDoc(profileRef, { 
+                username: localUsername,
+                groupId: userGroupId,
+                avatarColor: userAvatarColor,
+                avatarType: userAvatarType,
+                avatarVal: userAvatarVal
+            }, { merge: true });
+
+            const roomMetaRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', newCode);
+            await setDoc(roomMetaRef, {
+                creatorId: currentUser.uid,
+                creatorName: localUsername,
+                moderators: [], 
+                createdAt: new Date().toISOString()
+            });
+
+            updateDisplayValues();
+            hideMainMenu();
+            await initFirestoreDataListeners();
+            showToast("Room Created", `New Room Code ${userGroupId} initialized!`, "success");
+        } catch (e) {
+            console.error("Create workspace exception", e);
+            showToast("Error", "Could not initialize room.", "error");
+        } finally {
+            hideLoader();
+        }
+    };
+
+    window.triggerMainMenuJoin = async function() {
+        const codeInput = document.getElementById('menu-join-input');
+        const rawCode = codeInput.value.trim().toUpperCase();
+        if (!rawCode) {
+            showToast("Input Code", "Please enter a room code.", "error");
+            return;
+        }
+
+        const usernameField = document.getElementById('menu-username-input');
+        const usernameVal = usernameField.value.trim() || `Trader_${currentUser.uid.substring(0, 5)}`;
+
+        showLoader();
+        localUsername = usernameVal;
+        userGroupId = rawCode;
+
+        try {
+            const roomMetaRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', rawCode);
+            const roomSnap = await getDoc(roomMetaRef);
+            if (!roomSnap.exists()) {
+                await setDoc(roomMetaRef, {
+                    creatorId: currentUser.uid,
+                    creatorName: localUsername,
+                    moderators: [],
+                    createdAt: new Date().toISOString()
+                });
+            }
+
+            // RULE 1 COMPLIANCE: 6 segments document save
+            const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'info');
+            await setDoc(profileRef, { 
+                username: localUsername,
+                groupId: userGroupId,
+                avatarColor: userAvatarColor,
+                avatarType: userAvatarType,
+                avatarVal: userAvatarVal
+            }, { merge: true });
+
+            updateDisplayValues();
+            hideMainMenu();
+            await initFirestoreDataListeners();
+            showToast("Joined Workspace", `Connected to room: ${userGroupId}`, "success");
+        } catch (e) {
+            console.error("Join room exception", e);
+            showToast("Error", "Could not join workspace.", "error");
+        } finally {
+            hideLoader();
+        }
+    };
+
+    window.triggerJoinGroup = async function() {
+        const inputField = document.getElementById('join-group-input');
+        const rawCode = inputField.value.trim().toUpperCase();
+        if (!rawCode) return;
+
+        showLoader();
+        if (activeVoiceChannel) {
+            await disconnectVoice();
+        }
+        
+        userGroupId = rawCode;
+        inputField.value = "";
+
+        try {
+            // RULE 1 COMPLIANCE: 6 segments document save
+            const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'info');
+            await setDoc(profileRef, { groupId: userGroupId }, { merge: true });
+
+            const roomMetaRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', rawCode);
+            const roomSnap = await getDoc(roomMetaRef);
+            if (!roomSnap.exists()) {
+                await setDoc(roomMetaRef, {
+                    creatorId: currentUser.uid,
+                    creatorName: localUsername,
+                    moderators: [],
+                    createdAt: new Date().toISOString()
+                });
+            }
+
+            updateDisplayValues();
+            await initFirestoreDataListeners();
+
+            showToast("Joined Workspace", `Synchronized workspace on Code: ${userGroupId}`, "success");
+        } catch (e) {
+            console.error("Join room exception", e);
+        }
+    };
+
+    window.triggerCreateGroup = async function() {
+        showLoader();
+        if (activeVoiceChannel) {
+            await disconnectVoice();
+        }
+
+        const newCode = generateRandomRoomCode();
+        userGroupId = newCode;
+
+        try {
+            // RULE 1 COMPLIANCE: 6 segments document save
+            const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'info');
+            await setDoc(profileRef, { groupId: userGroupId }, { merge: true });
+
+            const roomMetaRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', newCode);
+            await setDoc(roomMetaRef, {
+                creatorId: currentUser.uid,
+                creatorName: localUsername,
+                moderators: [], 
+                createdAt: new Date().toISOString()
+            });
+
+            updateDisplayValues();
+            await initFirestoreDataListeners();
+
+            showToast("Room Created", `New Room Code ${userGroupId} initialized. Share this code with partners!`, "success");
+        } catch (e) {
+            console.error("Create workspace exception", e);
+        }
+    };
+
+    // Navigation and tabs switcher (Safely bound to window once at bottom)
+    window.switchTab = function(tabName) {
+        currentActiveTab = tabName;
+        
+        document.getElementById('view-dashboard').classList.add('hidden');
+        document.getElementById('view-chat').classList.add('hidden');
+        document.getElementById('view-leaderboard').classList.add('hidden');
+        document.getElementById('view-logs').classList.add('hidden');
+        document.getElementById('view-partners').classList.add('hidden');
+
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.className = "nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 text-gray-400 hover:bg-gray-800/40 hover:text-gray-200";
+        });
+
+        const mobileTabs = ['dashboard', 'chat', 'leaderboard', 'partners'];
+        mobileTabs.forEach(tab => {
+            const mBtn = document.getElementById(`mobile-btn-${tab}`);
+            if (mBtn) {
+                if (tab === tabName || (tabName === 'logs' && tab === 'partners')) {
+                    mBtn.className = "flex flex-col items-center justify-center flex-1 py-1 text-indigo-400";
+                } else {
+                    mBtn.className = "flex flex-col items-center justify-center flex-1 py-1 text-gray-400";
+                }
+            }
+        });
+
+        let title = "SyncPL Overview";
+        if (tabName === 'dashboard') {
+            document.getElementById('view-dashboard').classList.remove('hidden');
+            document.getElementById('btn-dashboard').className = "nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 bg-indigo-600/15 text-indigo-400 border border-indigo-500/10";
+            title = "Dashboard overview";
+        } else if (tabName === 'chat') {
+            document.getElementById('view-chat').classList.remove('hidden');
+            document.getElementById('btn-chat').className = "nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 bg-indigo-600/15 text-indigo-400 border border-indigo-500/10";
+            title = "Desk Chats & Voice Rooms";
+            document.getElementById('chat-unread-badge').classList.add('hidden');
+            const mBadge = document.getElementById('mobile-chat-unread-badge');
+            if (mBadge) mBadge.classList.add('hidden');
+            setTimeout(drawWorkspaceChat, 100);
+        } else if (tabName === 'leaderboard') {
+            document.getElementById('view-leaderboard').classList.remove('hidden');
+            document.getElementById('btn-leaderboard').className = "nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 bg-indigo-600/15 text-indigo-400 border border-indigo-500/10";
+            title = "Sync Leaderboard Board";
+        } else if (tabName === 'logs') {
+            document.getElementById('view-logs').classList.remove('hidden');
+            document.getElementById('btn-logs').className = "nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 bg-indigo-600/15 text-indigo-400 border border-indigo-500/10";
+            title = "Trading Synchronization Ledger";
+        } else if (tabName === 'partners') {
+            document.getElementById('view-partners').classList.remove('hidden');
+            document.getElementById('btn-partners').className = "nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 bg-indigo-600/15 text-indigo-400 border border-indigo-500/10";
+            title = "Workspace Customizer & System Settings";
+        }
+
+        document.getElementById('current-view-title').innerText = title;
+        triggerUIPaint();
+    };
+
+    window.toggleMobileChannels = function() {
+        const sidebar = document.getElementById('chat-channel-sidebar');
+        if (sidebar) {
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('flex');
+        }
+    };
+
+    function triggerChatNotificationBadge() {
+        if (currentActiveTab !== 'chat') {
+            const badge = document.getElementById('chat-unread-badge');
+            if (badge) badge.classList.remove('hidden');
+            const mBadge = document.getElementById('mobile-chat-unread-badge');
+            if (mBadge) mBadge.classList.remove('hidden');
+        }
+    }
+
+    window.setLeaderboardPeriod = function(period) {
+        currentLeaderboardPeriod = period;
+        document.querySelectorAll('.lbl-tab').forEach(btn => {
+            btn.className = "lbl-tab px-5 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition";
+        });
+        document.getElementById(`lbl-${period}`).className = "lbl-tab px-5 py-2 rounded-xl text-xs font-bold transition bg-indigo-600/15 text-indigo-400";
+        drawLeaderboard();
+    };
+
+    window.setLogScope = function(scope) {
+        logScope = scope;
+        document.querySelectorAll('.log-scope-btn').forEach(btn => {
+            btn.className = "log-scope-btn text-gray-400 hover:text-white px-4 py-1.5 rounded-xl text-xs font-bold transition";
+        });
+        document.getElementById(`log-scope-${scope}`).className = "log-scope-btn bg-indigo-600/15 text-indigo-400 px-4 py-1.5 rounded-xl text-xs font-bold transition";
+        drawLogsTable();
+    };
+
+    window.openLogModal = function() {
+        document.getElementById('modal-log-pnl').classList.remove('hidden');
+        setLogType(true);
+    };
+    window.closeLogModal = function() {
+        document.getElementById('modal-log-pnl').classList.add('hidden');
+    };
+
+    function generateRandomRoomCode() {
+        const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        let code = "PL-";
+        for (let i = 0; i < 4; i++) {
+            code += letters.charAt(Math.floor(Math.random() * letters.length));
+        }
+        return code;
+    }
+
+    window.copyGroupCode = function() {
+        const input = document.createElement('input');
+        input.value = userGroupId;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast("Room Code Copied", "Share this invitation code with your partners.", "info");
+    };
+
+    function showToast(title, msg, type = "info") {
+        const container = document.getElementById('toast-notif');
+        const tTitle = document.getElementById('toast-title');
+        const tBody = document.getElementById('toast-body');
+        const iconBox = document.getElementById('toast-icon-box');
+
+        if (!container || !tTitle || !tBody) return;
+
+        tTitle.innerText = title;
+        tBody.innerText = msg;
+
+        if (type === "success") {
+            iconBox.className = "p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 mr-3";
+            iconBox.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i>`;
+        } else if (type === "error") {
+            iconBox.className = "p-1.5 rounded-lg bg-rose-500/20 text-rose-400 mr-3";
+            iconBox.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i>`;
+        } else {
+            iconBox.className = "p-1.5 rounded-lg bg-indigo-600/20 text-indigo-400 mr-3";
+            iconBox.innerHTML = `<i data-lucide="info" class="w-5 h-5"></i>`;
+        }
+        lucide.createIcons();
+
+        container.classList.remove('opacity-0', 'translate-y-12', 'pointer-events-none');
+        container.classList.add('opacity-100', 'translate-y-0');
+
+        setTimeout(() => {
+            container.classList.remove('opacity-100', 'translate-y-0');
+            container.classList.add('opacity-0', 'translate-y-12', 'pointer-events-none');
+        }, 3200);
+    }
+
+    function showLoader() {
+        document.getElementById('loading-overlay').classList.remove('hidden');
+    }
+    
+    function hideLoader() {
+        document.getElementById('loading-overlay').classList.add('hidden');
+    }
+
+    function escapeHTML(str) {
+        if (!str) return '';
+        return str.replace(/[&<>'"]/g, 
+            tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag] || tag)
+        );
+    }
+</script>
+</body>
+</html>

@@ -468,7 +468,7 @@
             <!-- TAB: CHAT & VOICE -->
             <div id="view-chat" class="hidden flex flex-col md:flex-row h-full w-full absolute inset-0 bg-gray-950 overflow-hidden">
                 <!-- Sidebar Panel: Dynamic Channel Navigation -->
-                <div id="chat-channel-sidebar" class="hidden md:flex w-full md:w-56 bg-gray-900 border-b md:border-b-0 md:border-r border-gray-800 flex-col shrink-0 text-gray-300 overflow-hidden">
+                <div id="chat-channel-sidebar" class="hidden md:flex w-full md:w-56 bg-gray-900 border-b md:border-b-0 md:border-r border-gray-800 flex-col shrink-0 text-gray-300">
                     <div class="p-3 border-b border-gray-800 flex items-center justify-between">
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Workspace Channels</span>
                         <span class="text-[10px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold">LIVE</span>
@@ -491,8 +491,16 @@
                         <!-- Speaking indicators list -->
                         <div id="voice-connected-users" class="space-y-1.5 pt-1 max-h-24 overflow-y-auto font-mono"></div>
 
+                        <!-- Direct Audio Selector & Status Diagnostic visualizer inside Voice Panel -->
+                        <div class="pt-2 border-t border-gray-850 space-y-1.5">
+                            <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-wider">Select Input Mic</label>
+                            <select id="voice-panel-mic-selection" onchange="switchMicrophoneDevice(this.value)" class="w-full bg-gray-900 border border-gray-800 text-[10px] rounded-lg px-2 py-1 text-white font-medium focus:outline-none">
+                                <option value="">Querying Microphones...</option>
+                            </select>
+                        </div>
+
                         <!-- Mic, speaker, and mock triggers -->
-                        <div class="flex items-center justify-around border-t border-gray-800 pt-2 text-gray-400">
+                        <div class="flex items-center justify-around border-t border-gray-850 pt-2 text-gray-400">
                             <button id="btn-toggle-mic" onclick="toggleMicrophone()" class="p-1 hover:bg-gray-800 rounded text-gray-200 transition" title="Mute Microphone">
                                 <i data-lucide="mic" class="w-4 h-4"></i>
                             </button>
@@ -1103,35 +1111,43 @@
 
     // Hardware query selector
     async function enumerateMicDevices() {
-        const select = document.getElementById('audio-input-selection');
-        if (!select) return;
+        const selectSettings = document.getElementById('audio-input-selection');
+        const selectVoicePanel = document.getElementById('voice-panel-mic-selection');
+        if (!selectSettings && !selectVoicePanel) return;
 
         try {
-            // First check permissions
             if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const mics = devices.filter(d => d.kind === 'audioinput');
                 
-                select.innerHTML = '';
-                if (mics.length === 0) {
-                    select.innerHTML = `<option value="">No Microphones Found</option>`;
-                    return;
-                }
+                const selectHTML = mics.length === 0 
+                    ? `<option value="">No Microphones Found</option>`
+                    : mics.map(mic => `<option value="${mic.deviceId}">${mic.label || `Microphone (${mic.deviceId.substring(0, 5)})`}</option>`).join('');
 
-                mics.forEach(mic => {
-                    const opt = document.createElement('option');
-                    opt.value = mic.deviceId;
-                    opt.innerText = mic.label || `Microphone (${mic.deviceId.substring(0, 5)})`;
-                    select.appendChild(opt);
-                });
+                if (selectSettings) selectSettings.innerHTML = selectHTML;
+                if (selectVoicePanel) selectVoicePanel.innerHTML = selectHTML;
             } else {
-                select.innerHTML = `<option value="">Incompatible Browser API</option>`;
+                const errorHTML = `<option value="">Incompatible Browser API</option>`;
+                if (selectSettings) selectSettings.innerHTML = errorHTML;
+                if (selectVoicePanel) selectVoicePanel.innerHTML = errorHTML;
             }
         } catch (e) {
             console.error("Device enumeration error: ", e);
-            select.innerHTML = `<option value="">Permission Blocked</option>`;
+            const blockedHTML = `<option value="">Permission Blocked</option>`;
+            if (selectSettings) selectSettings.innerHTML = blockedHTML;
+            if (selectVoicePanel) selectVoicePanel.innerHTML = blockedHTML;
         }
     }
+
+    // Direct switcher callback from the voice status dropdown
+    window.switchMicrophoneDevice = async function(deviceId) {
+        if (!deviceId) return;
+        showToast("Microphone Updated", "Audio input device switched successfully.", "success");
+        if (activeVoiceChannel) {
+            // Re-join voice with the new hardware ID
+            await startHardwareDiagnostics(deviceId);
+        }
+    };
 
     // Audio Analyzer Diagnostic
     async function startHardwareDiagnostics(deviceId = '') {

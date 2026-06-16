@@ -19,6 +19,9 @@
             font-family: 'Inter', sans-serif;
             background-color: #060913;
             color: #f3f4f6;
+            overflow-x: hidden;
+            width: 100vw;
+            max-width: 100vw;
         }
         /* Scrollbar customization */
         ::-webkit-scrollbar {
@@ -127,7 +130,7 @@
     <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full ambient-glow-1 z-0"></div>
     <div class="absolute bottom-[-15%] left-[-10%] w-[60%] h-[60%] rounded-full ambient-glow-2 z-0"></div>
     
-    <div class="glass-panel p-8 rounded-3xl max-w-md w-full relative z-10 space-y-6 text-center shadow-2xl border border-darkBorder animate-in fade-in zoom-in-95 duration-200">
+    <div class="glass-panel p-6 md:p-8 rounded-3xl max-w-md w-full relative z-10 space-y-6 text-center shadow-2xl border border-darkBorder">
         <div class="flex flex-col items-center space-y-3">
             <div class="p-4 bg-gradient-to-tr from-indigo-600 to-pink-500 rounded-2xl text-white shadow-xl shadow-indigo-600/20">
                 <i data-lucide="trending-up" class="w-8 h-8"></i>
@@ -181,7 +184,7 @@
     <div class="ticker-inner text-gray-400 font-mono flex items-center" id="live-price-ticker-strip"></div>
 </div>
 
-<div id="app" class="flex-grow flex flex-col md:flex-row h-[calc(100vh-2rem)] overflow-hidden">
+<div id="app" class="flex-grow flex flex-col md:flex-row h-[calc(100vh-2rem)] overflow-hidden w-full max-w-full">
 
     <!-- Loading Screen Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-darkBg z-50 flex flex-col items-center justify-center space-y-4">
@@ -274,7 +277,7 @@
         </nav>
 
         <!-- Log Trade Bottom Trigger -->
-        <div class="p-4 border-t border-darkBorder/30">
+        <div class="p-4 border-t border-darkBorder/30 flex-shrink-0">
             <button onclick="openLogModal()" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-sm py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2 transition active:scale-[0.98]">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i>
                 <span>Log New Trade</span>
@@ -310,14 +313,14 @@
     </div>
 
     <!-- Main Content Area -->
-    <main class="flex-grow flex flex-col overflow-hidden bg-darkBg relative pb-16 md:pb-0">
+    <main class="flex-grow flex flex-col overflow-hidden bg-darkBg relative pb-16 md:pb-0 w-full max-w-full">
         
         <!-- Glowing ambient backdrop meshes -->
         <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full ambient-glow-1 z-0"></div>
         <div class="absolute bottom-[-15%] left-[-10%] w-[60%] h-[60%] rounded-full ambient-glow-2 z-0"></div>
 
         <!-- Global Header Bar -->
-        <header class="h-16 border-b border-darkBorder/30 bg-darkCard/30 backdrop-blur-md px-6 flex items-center justify-between shrink-0 z-10">
+        <header class="h-16 border-b border-darkBorder/30 bg-darkCard/30 backdrop-blur-md px-6 flex items-center justify-between shrink-0 z-10 w-full">
             <div class="flex items-center space-x-4">
                 <h2 id="current-view-title" class="font-extrabold text-white text-md tracking-tight">Dashboard Overview</h2>
             </div>
@@ -336,12 +339,12 @@
             </div>
         </header>
 
-        <div class="flex-grow flex flex-col min-h-0 relative z-10 overflow-hidden">
+        <div class="flex-grow flex flex-col min-h-0 relative z-10 overflow-hidden w-full max-w-full">
 
             <!-- TAB: DASHBOARD -->
-            <div id="view-dashboard" class="p-6 space-y-6 overflow-y-auto h-full text-gray-200">
+            <div id="view-dashboard" class="p-6 space-y-6 overflow-y-auto h-full text-gray-200 w-full max-w-full">
                 <!-- Metrics Bar -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Stat Card 1 -->
                     <div class="glass-panel glass-card-hover p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden">
                         <div class="flex items-center justify-between mb-4">
@@ -404,7 +407,7 @@
                 </div>
 
                 <!-- Consistency Heatmap Calendar -->
-                <div class="glass-panel p-6 rounded-3xl relative overflow-hidden">
+                <div class="glass-panel p-6 rounded-3xl relative overflow-hidden w-full max-w-full">
                     <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
                         <div>
                             <h3 class="font-bold text-gray-100 text-lg flex items-center gap-2">
@@ -419,13 +422,13 @@
                         </div>
                     </div>
                     
-                    <div class="overflow-x-auto pb-1.5">
+                    <div class="overflow-x-auto pb-1.5 w-full">
                         <div class="grid grid-cols-7 gap-2 text-center min-w-[500px]" id="heatmap-calendar-grid"></div>
                     </div>
                 </div>
 
                 <!-- Chart & Activity Panels -->
-                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 w-full max-w-full">
                     <!-- Chart Panel Container -->
                     <div class="glass-panel p-6 rounded-3xl xl:col-span-2 flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
@@ -438,13 +441,13 @@
                                 <span class="text-[10px] font-bold text-indigo-300 uppercase tracking-widest">Live Feed</span>
                             </div>
                         </div>
-                        <div class="relative min-h-[250px] md:min-h-[340px] flex items-center justify-center">
-                            <canvas id="pnlHistoryChart" class="w-full h-full"></canvas>
+                        <div class="relative min-h-[250px] md:min-h-[340px] flex items-center justify-center w-full">
+                            <canvas id="pnlHistoryChart" class="w-full h-full max-w-full"></canvas>
                         </div>
                     </div>
 
                     <!-- Live Activity Feed Container -->
-                    <div class="glass-panel p-6 rounded-3xl flex flex-col h-full max-h-[500px]">
+                    <div class="glass-panel p-6 rounded-3xl flex flex-col h-full max-h-[500px] overflow-hidden">
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <h3 class="font-bold text-gray-100 text-lg">Live Activity Feed</h3>
@@ -463,9 +466,9 @@
             </div>
 
             <!-- TAB: CHAT & VOICE -->
-            <div id="view-chat" class="hidden flex flex-col md:flex-row h-full w-full absolute inset-0 bg-gray-950">
+            <div id="view-chat" class="hidden flex flex-col md:flex-row h-full w-full absolute inset-0 bg-gray-950 overflow-hidden">
                 <!-- Sidebar Panel: Dynamic Channel Navigation -->
-                <div id="chat-channel-sidebar" class="hidden md:flex w-full md:w-56 bg-gray-900 border-b md:border-b-0 md:border-r border-gray-800 flex-col shrink-0 text-gray-300">
+                <div id="chat-channel-sidebar" class="hidden md:flex w-full md:w-56 bg-gray-900 border-b md:border-b-0 md:border-r border-gray-800 flex-col shrink-0 text-gray-300 overflow-hidden">
                     <div class="p-3 border-b border-gray-800 flex items-center justify-between">
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Workspace Channels</span>
                         <span class="text-[10px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold">LIVE</span>
@@ -504,16 +507,16 @@
                 </div>
 
                 <!-- Chat Middle Panel -->
-                <div class="flex-grow bg-gray-800 flex flex-col min-w-0">
+                <div class="flex-grow bg-gray-800 flex flex-col min-w-0 overflow-hidden h-full">
                     <div class="h-12 border-b border-gray-900 px-4 flex items-center justify-between shrink-0 bg-gray-900/60">
-                        <div class="flex items-center space-x-2">
-                            <button onclick="toggleMobileChannels()" class="md:hidden p-1.5 text-gray-400 hover:text-white mr-1 bg-gray-800/40 border border-gray-700/30 rounded-lg" title="Toggle Channel List">
+                        <div class="flex items-center space-x-2 min-w-0">
+                            <button onclick="toggleMobileChannels()" class="md:hidden p-1.5 text-gray-400 hover:text-white mr-1 bg-gray-800/40 border border-gray-700/30 rounded-lg shrink-0" title="Toggle Channel List">
                                 <i data-lucide="menu" class="w-4 h-4"></i>
                             </button>
-                            <span class="text-gray-500 font-bold">#</span>
-                            <span id="active-chat-channel-title" class="font-bold text-white text-sm">general-trading</span>
+                            <span class="text-gray-500 font-bold shrink-0">#</span>
+                            <span id="active-chat-channel-title" class="font-bold text-white text-sm truncate">general-trading</span>
                         </div>
-                        <div class="text-xs text-gray-400 bg-gray-900 px-2 py-1 rounded-md" id="channel-type-badge">Text Channel</div>
+                        <div class="text-xs text-gray-400 bg-gray-900 px-2 py-1 rounded-md shrink-0" id="channel-type-badge">Text Channel</div>
                     </div>
 
                     <!-- Chat Message Stream -->
@@ -533,7 +536,7 @@
                 </div>
 
                 <!-- Chat Right Panel: Active Members -->
-                <div class="hidden lg:flex w-48 bg-gray-900 border-l border-gray-800 flex-col shrink-0 text-gray-300">
+                <div class="hidden lg:flex w-48 bg-gray-900 border-l border-gray-800 flex-col shrink-0 text-gray-300 overflow-hidden h-full">
                     <div class="p-3 border-b border-gray-800">
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Online Partners</span>
                     </div>
@@ -542,7 +545,7 @@
             </div>
 
             <!-- TAB: LEADERBOARD -->
-            <div id="view-leaderboard" class="hidden p-6 space-y-6 overflow-y-auto h-full">
+            <div id="view-leaderboard" class="hidden p-6 space-y-6 overflow-y-auto h-full w-full max-w-full">
                 <div class="flex items-center justify-between flex-wrap gap-4">
                     <div>
                         <h3 class="font-black text-2xl text-white tracking-tight">Partner Performance Board</h3>
@@ -556,8 +559,8 @@
                     </div>
                 </div>
 
-                <div class="glass-panel rounded-3xl overflow-hidden">
-                    <div class="overflow-x-auto">
+                <div class="glass-panel rounded-3xl overflow-hidden w-full max-w-full">
+                    <div class="overflow-x-auto w-full">
                         <table class="min-w-full divide-y divide-darkBorder/40">
                             <thead>
                                 <tr class="bg-gray-900/40 text-left text-xs font-extrabold text-gray-400 uppercase tracking-wider">
@@ -575,8 +578,8 @@
             </div>
 
             <!-- TAB: LOGS -->
-            <div id="view-logs" class="hidden p-6 space-y-6 overflow-y-auto h-full">
-                <div class="flex justify-between items-center">
+            <div id="view-logs" class="hidden p-6 space-y-6 overflow-y-auto h-full w-full max-w-full">
+                <div class="flex justify-between items-center flex-wrap gap-4">
                     <div>
                         <h3 class="font-black text-2xl text-white tracking-tight">Ledger Logs</h3>
                         <p class="text-xs text-gray-400 mt-1">Comprehensive ledger list of active group</p>
@@ -602,8 +605,8 @@
                 </div>
 
                 <!-- Table Grid -->
-                <div class="glass-panel rounded-3xl overflow-hidden">
-                    <div class="overflow-x-auto">
+                <div class="glass-panel rounded-3xl overflow-hidden w-full max-w-full">
+                    <div class="overflow-x-auto w-full">
                         <table class="min-w-full divide-y divide-darkBorder/40">
                             <thead class="bg-darkBg/50">
                                 <tr>
@@ -626,11 +629,11 @@
             </div>
 
             <!-- TAB: WORKSPACE & CHAT SYSTEM SETTINGS -->
-            <div id="view-partners" class="hidden p-6 space-y-6 overflow-y-auto h-full text-gray-200">
+            <div id="view-partners" class="hidden p-6 space-y-6 overflow-y-auto h-full text-gray-200 w-full max-w-full pb-20 md:pb-6">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h3 class="font-black text-2xl text-white tracking-tight">Workspace Configuration Hub</h3>
-                        <p class="text-xs text-gray-400 mt-1">Fine-tune trading channels, customize profile tags, and configure the voice synthesis co-pilot.</p>
+                        <p class="text-xs text-gray-400 mt-1">Fine-tune trading channels, customize profile tags, and configure WebRTC microphone settings.</p>
                     </div>
                     <div id="settings-admin-header" class="hidden bg-amber-500/10 border border-amber-500/20 text-amber-400 px-4 py-2.5 rounded-xl flex items-center gap-2 self-start md:self-auto shadow-md shadow-amber-500/5 font-mono">
                         <i data-lucide="crown" class="w-4 h-4"></i>
@@ -638,7 +641,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-full">
                     <!-- Column 1: Profile & Room Sync -->
                     <div class="space-y-6">
                         <!-- Profile Card -->
@@ -770,8 +773,41 @@
                         </div>
                     </div>
 
-                    <!-- Column 3: AI Co-Pilot Vocal Speech & TTS Parameters -->
-                    <div class="space-y-6 font-sans">
+                    <!-- Column 3: WebRTC Audio Diagnostics -->
+                    <div class="space-y-6">
+                        <!-- Mic Selector & Level Diagnostics -->
+                        <div class="glass-panel p-5 rounded-2xl space-y-4">
+                            <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
+                                <i data-lucide="mic" class="text-indigo-400 w-4.5 h-4.5"></i> Hardware & Audio Settings
+                            </h4>
+                            
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">Input Microphone</label>
+                                <select id="audio-input-selection" class="w-full bg-darkBg border border-darkBorder/60 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-white font-medium">
+                                    <option value="">Querying Microphones...</option>
+                                </select>
+                            </div>
+
+                            <!-- Live Audio Waves visualizer -->
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                    <span>Signal Diagnostic</span>
+                                    <span id="diagnostic-mic-status" class="text-indigo-400 font-mono">Idle</span>
+                                </div>
+                                <div class="h-20 bg-darkBg rounded-xl border border-darkBorder/60 overflow-hidden relative flex items-center justify-center">
+                                    <canvas id="audio-diagnostic-canvas" class="w-full h-full block bg-[#03050a]"></canvas>
+                                    <p id="mic-diagnostics-text" class="absolute text-[10px] font-bold text-gray-500 pointer-events-none uppercase">Permit Microphone Access</p>
+                                </div>
+                            </div>
+
+                            <div class="pt-2">
+                                <button onclick="toggleAudioDeviceTest()" id="btn-diagnostic-test" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-3 px-4 rounded-xl transition flex items-center justify-center gap-1.5 shadow">
+                                    <i data-lucide="activity" class="w-4 h-4"></i> Start Loopback Test
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Voice Engine Parameters -->
                         <div class="glass-panel p-5 rounded-2xl space-y-4 shadow-lg">
                             <div class="flex items-center justify-between">
                                 <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
@@ -779,9 +815,6 @@
                                 </h4>
                                 <span class="bg-indigo-950 text-indigo-400 border border-indigo-800/40 text-[9px] font-bold px-1.5 py-0.5 rounded font-mono">GEMINI TTS</span>
                             </div>
-                            <p class="text-xs text-gray-400 leading-relaxed">
-                                Customize the voice of your AI Risk Advisor. SyncPL integrates with Google's TTS engine to generate physical synthesized voices.
-                            </p>
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">AI Voice Actor</label>
                                 <select id="tts-voice-selection" class="w-full bg-darkBg border border-darkBorder/60 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-white font-medium">
@@ -796,29 +829,8 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">Vocal Prompt / Style Instructions</label>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">Vocal Style Instructions</label>
                                 <input type="text" id="tts-vocal-prompt" placeholder="Say critically like a strict risk analyst..." class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono" value="Speak critically like a strict hedge fund risk analyst">
-                            </div>
-
-                            <!-- Push to Talk vs Continuous Selector -->
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">Microphone Activation</label>
-                                <div class="flex items-center justify-between bg-darkBg/60 p-3 border border-darkBorder/40 rounded-xl">
-                                    <span class="text-xs text-gray-300 font-medium">Continuous Voice Detection</span>
-                                    <div class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" id="continuous-audio-toggle" checked class="sr-only peer">
-                                        <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Microphone Sensitivity Slider -->
-                            <div>
-                                <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">
-                                    <span>Mic Input Sensitivity</span>
-                                    <span id="mic-sens-percentage" class="font-mono">80%</span>
-                                </div>
-                                <input type="range" min="1" max="100" value="80" id="mic-sensitivity-slider" class="w-full accent-indigo-500 cursor-pointer h-1.5 bg-gray-800 rounded-lg appearance-none">
                             </div>
 
                             <button onclick="triggerVoiceSpeakSim()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 px-4 rounded-xl transition flex items-center justify-center gap-1.5 shadow shadow-emerald-600/10 font-sans">
@@ -862,11 +874,11 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Date</label>
-                    <input type="date" id="pnl-date-input" required class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-bold">
+                    <input type="date" id="pnl-date-input" required class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Asset / Ticker</label>
-                    <input type="text" id="pnl-asset-input" placeholder="e.g. BTC, SPY" required class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 uppercase font-mono font-bold">
+                    <input type="text" id="pnl-asset-input" placeholder="e.g. BTC, SPY" required class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 uppercase font-mono">
                 </div>
             </div>
 
@@ -997,7 +1009,7 @@
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Application Configuration - Synchronized with live database credentials
+    // Application Configuration
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'trading-pnl-sync-2026';
     const fallbackConfig = {
         apiKey: "AIzaSyBo7L4wLVLmursIzQvDujXU7ECYoRw2-uw",
@@ -1066,11 +1078,21 @@
     let activeChatChannelType = "text"; 
     let newChannelTypeSelection = "text"; // text or voice
 
-    // Voice variables
+    // Voice & WebRTC variables
     let isMuted = false;
     let isDeafened = false;
     let activeVoiceChannel = null; 
     let userMediaStream = null;
+
+    // WebRTC Audio context diagnostic variables
+    let audioContext = null;
+    let analyserNode = null;
+    let dataArray = null;
+    let canvasElement = null;
+    let canvasCtx = null;
+    let localAudioTrack = null;
+    let diagnosticTestActive = false;
+    let loopbackAudioNode = null;
 
     // Audio elements & speech synthesis playing
     let isAiSpeaking = false;
@@ -1079,86 +1101,139 @@
     // Custom confirmation callback registry
     let confirmActionCallback = null;
 
-    // Synchronizer tones
-    function playVoiceRoomSound(type) {
+    // Hardware query selector
+    async function enumerateMicDevices() {
+        const select = document.getElementById('audio-input-selection');
+        if (!select) return;
+
         try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            const ctx = new AudioContext();
-            const now = ctx.currentTime;
-            
-            if (type === 'join') {
-                const osc1 = ctx.createOscillator();
-                const gain1 = ctx.createGain();
-                osc1.type = 'sine';
-                osc1.frequency.setValueAtTime(523.25, now);
-                gain1.gain.setValueAtTime(0.08, now);
-                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-                osc1.connect(gain1);
-                gain1.connect(ctx.destination);
-                osc1.start(now);
-                osc1.stop(now + 0.15);
+            // First check permissions
+            if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const mics = devices.filter(d => d.kind === 'audioinput');
+                
+                select.innerHTML = '';
+                if (mics.length === 0) {
+                    select.innerHTML = `<option value="">No Microphones Found</option>`;
+                    return;
+                }
 
-                const osc2 = ctx.createOscillator();
-                const gain2 = ctx.createGain();
-                osc2.type = 'sine';
-                osc2.frequency.setValueAtTime(659.25, now + 0.08);
-                gain2.gain.setValueAtTime(0.08, now + 0.08);
-                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                osc2.connect(gain2);
-                gain2.connect(ctx.destination);
-                osc2.start(now + 0.08);
-                osc2.stop(now + 0.3);
-            } else if (type === 'leave') {
-                const osc1 = ctx.createOscillator();
-                const gain1 = ctx.createGain();
-                osc1.type = 'sine';
-                osc1.frequency.setValueAtTime(659.25, now);
-                gain1.gain.setValueAtTime(0.06, now);
-                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-                osc1.connect(gain1);
-                gain1.connect(ctx.destination);
-                osc1.start(now);
-                osc1.stop(now + 0.15);
-
-                const osc2 = ctx.createOscillator();
-                const gain2 = ctx.createGain();
-                osc2.type = 'sine';
-                osc2.frequency.setValueAtTime(523.25, now + 0.08);
-                gain2.gain.setValueAtTime(0.06, now + 0.08);
-                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                osc2.connect(gain2);
-                gain2.connect(ctx.destination);
-                osc2.start(now + 0.08);
-                osc2.stop(now + 0.3);
+                mics.forEach(mic => {
+                    const opt = document.createElement('option');
+                    opt.value = mic.deviceId;
+                    opt.innerText = mic.label || `Microphone (${mic.deviceId.substring(0, 5)})`;
+                    select.appendChild(opt);
+                });
+            } else {
+                select.innerHTML = `<option value="">Incompatible Browser API</option>`;
             }
         } catch (e) {
-            console.warn("AudioContext blocked:", e);
+            console.error("Device enumeration error: ", e);
+            select.innerHTML = `<option value="">Permission Blocked</option>`;
         }
     }
 
-    // Window Onload lifecycle
-    window.onload = async function() {
-        lucide.createIcons();
-        initDefaultInputs();
-        setupInputSliders();
-        initLiveTickerTape(); 
-        await initApplicationAuth();
-    };
+    // Audio Analyzer Diagnostic
+    async function startHardwareDiagnostics(deviceId = '') {
+        const text = document.getElementById('mic-diagnostics-text');
+        const status = document.getElementById('diagnostic-mic-status');
+        canvasElement = document.getElementById('audio-diagnostic-canvas');
+        if (!canvasElement) return;
 
-    function initDefaultInputs() {
-        document.getElementById('pnl-date-input').value = new Date().toISOString().split('T')[0];
-    }
+        canvasCtx = canvasElement.getContext('2d');
 
-    function setupInputSliders() {
-        const slider = document.getElementById('mic-sensitivity-slider');
-        const display = document.getElementById('mic-sens-percentage');
-        if (slider && display) {
-            slider.oninput = function() {
-                display.innerText = `${this.value}%`;
+        try {
+            const constraints = {
+                audio: deviceId ? { deviceId: { exact: deviceId } } : true
             };
+            userMediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+            localAudioTrack = userMediaStream.getAudioTracks()[0];
+
+            // Setup audio visualizer context
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioContext = new AudioContext();
+            const source = audioContext.createMediaStreamSource(userMediaStream);
+            
+            analyserNode = audioContext.createAnalyser();
+            analyserNode.fftSize = 256;
+            const bufferLength = analyserNode.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+
+            source.connect(analyserNode);
+
+            if (text) text.classList.add('hidden');
+            if (status) {
+                status.innerText = "Active";
+                status.className = "text-emerald-400 font-mono";
+            }
+
+            drawHardwareAnalyzerWaveform();
+            enumerateMicDevices(); // Refresh in case permission granted labels
+        } catch (err) {
+            console.error("Mic diagnostic initialization failed: ", err);
+            showToast("Microphone Error", "Please allow microphone access in your browser.", "error");
+            if (status) {
+                status.innerText = "Blocked";
+                status.className = "text-rose-500 font-mono";
+            }
         }
     }
+
+    function drawHardwareAnalyzerWaveform() {
+        if (!canvasCtx || !canvasElement) return;
+
+        requestAnimationFrame(drawHardwareAnalyzerWaveform);
+
+        const width = canvasElement.width;
+        const height = canvasElement.height;
+
+        if (analyserNode) {
+            analyserNode.getByteFrequencyData(dataArray);
+        }
+
+        canvasCtx.fillStyle = '#03050a';
+        canvasCtx.fillRect(0, 0, width, height);
+
+        const barWidth = (width / dataArray.length) * 1.5;
+        let barHeight;
+        let x = 0;
+
+        for (let i = 0; i < dataArray.length; i++) {
+            barHeight = dataArray[i] / 2;
+
+            // Premium gradient line
+            canvasCtx.fillStyle = `rgb(99, 102, ${Math.floor(barHeight + 100)})`;
+            canvasCtx.fillRect(x, height - barHeight, barWidth - 1, barHeight);
+
+            x += barWidth + 1;
+        }
+    }
+
+    // Toggle real-time audio loopback so users can literally hear their own test
+    window.toggleAudioDeviceTest = function() {
+        const btn = document.getElementById('btn-diagnostic-test');
+        if (!audioContext || !userMediaStream) {
+            const selectedMicId = document.getElementById('audio-input-selection').value;
+            startHardwareDiagnostics(selectedMicId);
+            return;
+        }
+
+        if (!diagnosticTestActive) {
+            // Route local stream to speaker output
+            loopbackAudioNode = audioContext.createMediaStreamDestination();
+            const source = audioContext.createMediaStreamSource(userMediaStream);
+            source.connect(audioContext.destination); // Play local stream to speakers/headset
+            
+            diagnosticTestActive = true;
+            btn.className = "w-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs py-3 px-4 rounded-xl transition flex items-center justify-center gap-1.5 shadow";
+            btn.innerHTML = `<i data-lucide="square" class="w-4 h-4"></i> Stop Loopback Test`;
+            showToast("Loopback Active", "Speak into your microphone. You should hear yourself in real-time.", "info");
+        } else {
+            // Disconnect loopback
+            location.reload(); // Quick reset audio nodes to clean pipelines safely
+        }
+        lucide.createIcons();
+    };
 
     // Authentication Sequence (RULE 3)
     async function initApplicationAuth() {
@@ -1171,6 +1246,7 @@
             }
             currentUser = userCredential.user;
             await initSyncAndUserDoc();
+            enumerateMicDevices();
         } catch (error) {
             console.error("Auth Exception:", error);
             showToast("Sync offline", "Fallback local mode started.", "error");
@@ -1228,7 +1304,7 @@
     }
 
     function showMainMenu() {
-        // FIXED LAYOUT OVERLAP ({E44CF6D8-9765-45C2-B554-5117EDEDFBC7}.png): Hide #app entirely when Welcome is active!
+        // FIXED LAYOUT OVERLAP: Hide #app entirely when Welcome onboarding overlay is active
         document.getElementById('main-menu-overlay').classList.remove('hidden');
         document.getElementById('app').classList.add('hidden');
         document.getElementById('menu-username-input').value = localUsername;
@@ -1550,24 +1626,6 @@
         lucide.createIcons();
     }
 
-    async function setupDefaultChannelsForGroup() {
-        try {
-            const channelsCol = collection(db, 'artifacts', appId, 'public', 'data', 'channels');
-            const defaults = [
-                { name: 'general-trading', type: 'text', groupId: userGroupId, createdAt: new Date().toISOString() },
-                { name: 'pnl-flex', type: 'text', groupId: userGroupId, createdAt: new Date().toISOString() },
-                { name: 'market-alpha', type: 'text', groupId: userGroupId, createdAt: new Date().toISOString() },
-                { name: 'Voice Desk 1', type: 'voice', groupId: userGroupId, createdAt: new Date().toISOString() },
-                { name: '🤖 AI Risk Assistant', type: 'voice', groupId: userGroupId, createdAt: new Date().toISOString() }
-            ];
-            for (const item of defaults) {
-                await addDoc(channelsCol, item);
-            }
-        } catch (e) {
-            console.error("Default channel creation skipped: ", e);
-        }
-    }
-
     function drawDynamicChannelsUI() {
         const container = document.getElementById('dynamic-channels-list');
         if (!container) return;
@@ -1768,60 +1826,6 @@
         } finally {
             hideLoader();
         }
-    };
-
-    // restored robust deleteCustomChannel function
-    window.deleteCustomChannel = async function(docId, name) {
-        const isAdmin = currentUser && roomAdminId === currentUser.uid;
-        const isMod = currentUser && roomMods.includes(currentUser.uid);
-        if (!isAdmin && !isMod) {
-            showToast("Admin Only", "Only admins or moderators can delete channels.", "error");
-            return;
-        }
-
-        showCustomConfirm(
-            "Delete Channel", 
-            `Are you sure you want to permanently delete the channel #${name}? All live activities inside this node will be disconnected.`, 
-            async () => {
-                showLoader();
-                try {
-                    if (activeVoiceChannel === name) {
-                        await disconnectVoice();
-                    }
-
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'channels', docId);
-                    await deleteDoc(docRef);
-
-                    if (activeChatChannel === name) {
-                        const remainingTextChan = customChannels.find(c => c.type === 'text' && c.id !== docId);
-                        if (remainingTextChan) {
-                            selectChatChannel(remainingTextChan.name, 'text');
-                        } else {
-                            activeChatChannel = '';
-                            document.getElementById('active-chat-channel-title').innerText = 'Select a Channel';
-                            const chatContainer = document.getElementById('chat-messages-container');
-                            if (chatContainer) {
-                                chatContainer.innerHTML = `
-                                    <div class="flex flex-col items-center justify-center h-full py-16 text-gray-500">
-                                        <i data-lucide="message-square" class="w-12 h-12 text-gray-700 mb-2"></i>
-                                        <p class="text-sm font-bold">No channels are active</p>
-                                        <p class="text-xs text-center px-4">Create or configure a text channel in workspace settings!</p>
-                                    </div>
-                                `;
-                                lucide.createIcons();
-                            }
-                        }
-                    }
-
-                    showToast("Channel Removed", `Successfully deleted channel: ${name}`, "info");
-                } catch (e) {
-                    console.error("Delete channel error:", e);
-                    showToast("Action Failed", "Could not remove selected workspace channel.", "error");
-                } finally {
-                    hideLoader();
-                }
-            }
-        );
     };
 
     window.showCustomConfirm = function(title, message, callback) {

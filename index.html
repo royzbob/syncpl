@@ -131,7 +131,7 @@
     <p class="text-gray-300 font-semibold tracking-wider text-sm animate-pulse">Syncing high-fidelity trading modules...</p>
 </div>
 
-<!-- Main Welcome / Join Room Onboarding Menu -->
+<!-- Main Onboarding & Authentication Overlay -->
 <div id="main-menu-overlay" class="hidden fixed inset-0 bg-[#060913] z-50 flex flex-col items-center justify-center p-4 overflow-y-auto">
     <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full ambient-glow-1 z-0"></div>
     <div class="absolute bottom-[-15%] left-[-10%] w-[60%] h-[60%] rounded-full ambient-glow-2 z-0"></div>
@@ -143,54 +143,113 @@
             </div>
             <div>
                 <h1 class="font-black text-3xl tracking-tight bg-gradient-to-r from-indigo-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">SyncPL</h1>
-                <p class="text-xs text-gray-400 font-bold tracking-wider uppercase mt-1">Institutional Trading Sync</p>
+                <p class="text-[10px] text-gray-400 font-bold tracking-wider uppercase mt-1">Multi-Device Portfolio Synchronization</p>
             </div>
         </div>
 
-        <p class="text-xs text-gray-400 leading-relaxed">
-            Welcome to SyncPL. Establish a secure workspace or synchronize portfolio metrics, daily, weekly, and monthly tracking with your trading partners in real-time.
-        </p>
-
-        <div class="space-y-4 pt-2">
-            <!-- Create Room Card Option -->
-            <button onclick="triggerMainMenuCreate()" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2 transition active:scale-[0.98]">
-                <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                <span>Create New Sync Room</span>
+        <!-- Onboarding Navigation Tabs -->
+        <div class="flex rounded-xl bg-darkBg/80 p-1 border border-darkBorder/40">
+            <button onclick="setAuthTab('guest')" id="tab-auth-guest" class="flex-grow py-2 rounded-lg text-xs font-bold text-indigo-400 bg-indigo-600/10 transition">
+                Guest Access
             </button>
+            <button onclick="setAuthTab('login')" id="tab-auth-login" class="flex-grow py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition">
+                Log In
+            </button>
+            <button onclick="setAuthTab('register')" id="tab-auth-register" class="flex-grow py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition">
+                Register
+            </button>
+        </div>
 
+        <!-- TAB CONTENT: Anonymous Guest -->
+        <div id="auth-panel-guest" class="space-y-4">
+            <p class="text-xs text-gray-400 leading-relaxed text-center">
+                Access instantly as a temporary Guest. To persist ledger logs across multiple devices, use the Register tab.
+            </p>
+            <div class="space-y-2 text-left">
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Trader Nickname</label>
+                <input type="text" id="guest-username-input" class="w-full bg-darkBg border border-darkBorder rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold" value="Trader">
+            </div>
+            <button onclick="triggerGuestAuth()" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2 transition active:scale-[0.98]">
+                <i data-lucide="user" class="w-4 h-4"></i>
+                <span>Enter as Guest</span>
+            </button>
+        </div>
+
+        <!-- TAB CONTENT: Email Login -->
+        <div id="auth-panel-login" class="hidden space-y-4">
+            <p class="text-xs text-gray-400 leading-relaxed text-center">
+                Sign in with your SyncPL credentials to access your permanent trading rooms.
+            </p>
+            <form onsubmit="handleEmailLogin(event)" class="space-y-3 text-left">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Email Address</label>
+                    <input type="email" id="login-email-input" required placeholder="name@domain.com" class="w-full bg-darkBg border border-darkBorder rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Password</label>
+                    <input type="password" id="login-password-input" required placeholder="••••••••" class="w-full bg-darkBg border border-darkBorder rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold">
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-sm py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2 transition active:scale-[0.98]">
+                    <i data-lucide="log-in" class="w-4 h-4"></i>
+                    <span>Log In to Workspace</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- TAB CONTENT: Register -->
+        <div id="auth-panel-register" class="hidden space-y-4">
+            <p class="text-xs text-gray-400 leading-relaxed text-center">
+                Create a permanent synchronized profile to protect your dashboards and logs.
+            </p>
+            <form onsubmit="handleEmailRegister(event)" class="space-y-3 text-left">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Trader Nickname</label>
+                    <input type="text" id="register-username-input" required placeholder="TradingAlias" class="w-full bg-darkBg border border-darkBorder rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Email Address</label>
+                    <input type="email" id="register-email-input" required placeholder="name@domain.com" class="w-full bg-darkBg border border-darkBorder rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Password</label>
+                    <input type="password" id="register-password-input" required placeholder="Minimum 6 characters" class="w-full bg-darkBg border border-darkBorder rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold">
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-sm py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2 transition active:scale-[0.98]">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    <span>Register Account</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Room Synchronization Option (Hidden until Auth succeeds or skips) -->
+        <div id="auth-group-panels" class="hidden pt-4 border-t border-darkBorder/40 space-y-4 animate-in fade-in slide-in-from-bottom-2">
             <div class="relative flex py-2 items-center">
                 <div class="flex-grow border-t border-darkBorder"></div>
-                <span class="flex-shrink mx-4 text-gray-500 text-xs font-bold uppercase tracking-wider">or join existing</span>
+                <span class="flex-shrink mx-4 text-gray-500 text-[10px] font-bold uppercase tracking-wider">Sync Room Connection</span>
                 <div class="flex-grow border-t border-darkBorder"></div>
             </div>
 
-            <!-- Join Room Form Option -->
-            <div class="space-y-2 text-left">
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Partner Room Code</label>
-                <div class="flex gap-2">
-                    <input type="text" id="menu-join-input" placeholder="PL-XXXX" class="bg-darkBg border border-darkBorder rounded-xl px-4 py-3 text-sm text-white uppercase font-bold tracking-widest focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-grow text-center font-mono">
-                    <button onclick="triggerMainMenuJoin()" class="bg-indigo-950 hover:bg-indigo-900 border border-indigo-500/30 text-indigo-400 font-bold text-sm px-6 rounded-xl transition active:scale-[0.95]">Join</button>
-                </div>
-            </div>
-        </div>
+            <div class="space-y-3">
+                <button onclick="triggerMainMenuCreate()" class="w-full bg-indigo-950/80 border border-indigo-500/30 hover:bg-indigo-900/60 text-indigo-400 font-bold text-xs py-3 px-4 rounded-xl transition flex items-center justify-center space-x-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Establish New Sync Room</span>
+                </button>
 
-        <!-- Profile configuration inside onboarding -->
-        <div class="pt-4 border-t border-darkBorder/30 text-left space-y-3">
-            <span class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center">Set Your Trader Identity</span>
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">Trader Nickname</label>
-                <input type="text" id="menu-username-input" class="w-full bg-darkBg border border-darkBorder rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold" value="Trader">
+                <div class="flex gap-2">
+                    <input type="text" id="menu-join-input" placeholder="PL-XXXX" class="bg-darkBg border border-darkBorder rounded-xl px-4 py-2.5 text-xs text-white uppercase font-bold tracking-widest focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-grow text-center font-mono">
+                    <button onclick="triggerMainMenuJoin()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-6 rounded-xl transition">Join</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Live Price Ticker Header -->
+<!-- Live Ticker Strip -->
 <div class="ticker-wrap w-full h-8 flex items-center shrink-0 select-none z-30">
     <div class="ticker-inner text-gray-400 font-mono flex items-center" id="live-price-ticker-strip"></div>
 </div>
 
-<div id="app" class="flex-grow flex flex-col md:flex-row h-[calc(100vh-2rem)] overflow-hidden">
+<div id="app" class="hidden flex-grow flex flex-col md:flex-row h-[calc(100vh-2rem)] overflow-hidden">
 
     <!-- Sidebar / Navigation -->
     <aside class="hidden md:flex w-full md:w-64 bg-darkCard/80 border-b md:border-b-0 md:border-r border-darkBorder/40 flex-col shrink-0 z-20 backdrop-blur-md">
@@ -216,12 +275,12 @@
             <div class="flex-grow overflow-hidden">
                 <div class="flex items-center space-x-1">
                     <span id="user-display-name" class="font-semibold text-sm text-gray-100 truncate">Trader</span>
-                    <button onclick="switchTab('partners')" class="text-gray-500 hover:text-white transition">
-                        <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                    <button onclick="triggerLogout()" class="text-gray-500 hover:text-rose-400 transition" title="Log Out / Switch Account">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                     </button>
                 </div>
-                <p id="user-status-text" class="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold">
-                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active Sync
+                <p id="user-status-text" class="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold truncate">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> <span id="user-status-auth-lbl">Active Sync</span>
                 </p>
             </div>
         </div>
@@ -238,7 +297,7 @@
 
             <button onclick="switchTab('chat')" id="btn-chat" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 text-gray-400 hover:bg-gray-800/40 hover:text-gray-200">
                 <div class="flex items-center space-x-3">
-                    <i data-lucide="message-square-code" class="w-4 h-4"></i>
+                    <i data-lucide="message-square-code" class="w-4.5 h-4.5"></i>
                     <span>Trading Desk & Voice</span>
                 </div>
                 <span id="chat-unread-badge" class="hidden text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full font-bold">NEW</span>
@@ -246,7 +305,7 @@
 
             <button onclick="switchTab('leaderboard')" id="btn-leaderboard" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 text-gray-400 hover:bg-gray-800/40 hover:text-gray-200">
                 <div class="flex items-center space-x-3">
-                    <i data-lucide="trophy" class="w-4 h-4"></i>
+                    <i data-lucide="trophy" class="w-4.5 h-4.5"></i>
                     <span>Leaderboard</span>
                 </div>
                 <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-60"></i>
@@ -254,7 +313,7 @@
 
             <button onclick="switchTab('logs')" id="btn-logs" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 text-gray-400 hover:bg-gray-800/40 hover:text-gray-200">
                 <div class="flex items-center space-x-3">
-                    <i data-lucide="history" class="w-4 h-4"></i>
+                    <i data-lucide="history" class="w-4.5 h-4.5"></i>
                     <span>Ledger Logs</span>
                 </div>
                 <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-60"></i>
@@ -263,7 +322,7 @@
             <!-- Workspace Settings & Customizer Tab -->
             <button onclick="switchTab('partners')" id="btn-partners" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 text-gray-400 hover:bg-gray-800/40 hover:text-gray-200">
                 <div class="flex items-center space-x-3">
-                    <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+                    <i data-lucide="sliders-horizontal" class="w-4.5 h-4.5"></i>
                     <span>Workspace Settings</span>
                 </div>
                 <div class="flex items-center gap-1.5">
@@ -276,7 +335,7 @@
         <!-- Log Trade Bottom Trigger -->
         <div class="p-4 border-t border-darkBorder/30">
             <button onclick="openLogModal()" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-sm py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2 transition active:scale-[0.98]">
-                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <i data-lucide="plus-circle" class="w-4.5 h-4.5"></i>
                 <span>Log New Trade</span>
             </button>
         </div>
@@ -325,13 +384,13 @@
             <div class="flex items-center space-x-3">
                 <div class="flex flex-col items-end text-right">
                     <p class="text-[9px] uppercase text-gray-500 font-extrabold tracking-widest">Active Workspace Room</p>
-                    <p id="top-room-code" class="text-sm font-bold text-indigo-400 tracking-wider font-mono">CREATING...</p>
+                    <p id="top-room-code" class="text-sm font-bold text-indigo-400 tracking-wider font-mono font-bold">CREATING...</p>
                 </div>
                 <button onclick="copyGroupCode()" class="bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-500/20 text-indigo-400 p-2.5 rounded-xl transition active:scale-[0.95]" title="Copy Room Invite Link">
-                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    <i data-lucide="copy" class="w-4.5 h-4.5"></i>
                 </button>
                 <button onclick="switchTab('partners')" class="bg-gray-800/30 hover:bg-gray-800/60 border border-gray-700/20 text-gray-300 p-2.5 rounded-xl transition active:scale-[0.95]" title="Workspace Setup & Channels">
-                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    <i data-lucide="settings" class="w-4.5 h-4.5"></i>
                 </button>
             </div>
         </header>
@@ -489,16 +548,26 @@
                         <div id="voice-connected-users" class="space-y-1.5 pt-1 max-h-24 overflow-y-auto font-mono"></div>
 
                         <!-- Mic, speaker, and mock triggers -->
-                        <div class="flex items-center justify-around border-t border-gray-800 pt-2 text-gray-400">
-                            <button id="btn-toggle-mic" onclick="toggleMicrophone()" class="p-1 hover:bg-gray-800 rounded text-gray-200 transition" title="Mute Microphone">
-                                <i data-lucide="mic" class="w-4 h-4"></i>
-                            </button>
-                            <button id="btn-toggle-deafen" onclick="toggleDeafen()" class="p-1 hover:bg-gray-800 rounded text-gray-200 transition" title="Deafen Audio">
-                                <i data-lucide="volume-x" class="w-4 h-4"></i>
-                            </button>
-                            <button onclick="triggerVoiceSpeakSim()" class="p-1 hover:bg-gray-800 rounded text-indigo-400 transition" title="Simulate AI Advisor Conversation">
-                                <i data-lucide="sparkles" class="w-4 h-4"></i>
-                            </button>
+                        <div class="flex flex-col border-t border-gray-800 pt-2 space-y-2">
+                            <!-- Direct Chat Tab Audio Settings -->
+                            <div class="flex flex-col space-y-1">
+                                <label class="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Active Microphone</label>
+                                <select id="voice-input-device-chat" onchange="switchMicrophoneDevice(this.value)" class="bg-gray-900 border border-gray-800 text-[10px] rounded-lg p-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-white font-medium">
+                                    <option value="">Default Microphone</option>
+                                </select>
+                            </div>
+
+                            <div class="flex items-center justify-around text-gray-400">
+                                <button id="btn-toggle-mic" onclick="toggleMicrophone()" class="p-1 hover:bg-gray-800 rounded text-gray-200 transition" title="Mute Microphone">
+                                    <i data-lucide="mic" class="w-4 h-4"></i>
+                                </button>
+                                <button id="btn-toggle-deafen" onclick="toggleDeafen()" class="p-1 hover:bg-gray-800 rounded text-gray-200 transition" title="Deafen Audio">
+                                    <i data-lucide="volume-x" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="triggerVoiceSpeakSim()" class="p-1 hover:bg-gray-800 rounded text-indigo-400 transition" title="Simulate AI Advisor Conversation">
+                                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -586,7 +655,7 @@
                             <i data-lucide="download" class="w-4 h-4"></i> Export CSV
                         </button>
                         <button onclick="openLogModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-2">
-                            <i data-lucide="plus" class="w-4 h-4"></i> Add Record
+                            <i data-lucide="plus" class="w-4.5 h-4.5"></i> Add Record
                         </button>
                     </div>
                 </div>
@@ -594,7 +663,7 @@
                 <!-- Filter Panel -->
                 <div class="glass-panel p-4 rounded-2xl flex gap-4 items-center flex-wrap">
                     <div class="flex items-center space-x-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                        <i data-lucide="filter" class="w-4 h-4 text-indigo-400"></i>
+                        <i data-lucide="filter" class="w-4.5 h-4.5 text-indigo-400"></i>
                         <span>Filter Scope:</span>
                     </div>
                     <button onclick="setLogScope('all')" id="log-scope-all" class="log-scope-btn bg-indigo-600/15 text-indigo-400 px-4 py-1.5 rounded-xl text-xs font-bold transition">Group Entries</button>
@@ -638,12 +707,11 @@
                     </div>
                 </div>
 
-                <!-- Expanded Grid Layout for Complete Symmetry (4-Column Hardware Sync) -->
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Column 1: Profile & Room Sync -->
                     <div class="space-y-6">
                         <!-- Profile Card -->
-                        <div class="glass-panel p-5 rounded-2xl space-y-4 shadow-lg">
+                        <div class="glass-panel p-5 rounded-2xl space-y-4">
                             <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
                                 <i data-lucide="user" class="text-indigo-400 w-4.5 h-4.5"></i> Sync Profile Settings
                             </h4>
@@ -702,12 +770,9 @@
                                 Apply Changes
                             </button>
                         </div>
-                    </div>
 
-                    <!-- Column 2: Room Sync & Integrations -->
-                    <div class="space-y-6">
                         <!-- Room Sync Connection -->
-                        <div class="glass-panel p-5 rounded-2xl space-y-4 shadow-lg">
+                        <div class="glass-panel p-5 rounded-2xl space-y-4">
                             <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
                                 <i data-lucide="globe" class="text-indigo-400 w-4.5 h-4.5"></i> Room Integration
                             </h4>
@@ -729,20 +794,12 @@
                                 Create New Room Code
                             </button>
                         </div>
-
-                        <!-- Active Channel Management List -->
-                        <div class="glass-panel p-5 rounded-2xl space-y-3 shadow-lg">
-                            <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
-                                <i data-lucide="list-video" class="text-indigo-400 w-4.5 h-4.5"></i> Manage Workspace Channels
-                            </h4>
-                            <div class="space-y-2 max-h-48 overflow-y-auto pr-1 font-mono" id="manage-channels-list"></div>
-                        </div>
                     </div>
 
-                    <!-- Column 3: Channels Creation -->
+                    <!-- Column 2: Channels Management -->
                     <div class="space-y-6">
                         <!-- Create New Channels Form -->
-                        <div class="glass-panel p-5 rounded-2xl space-y-4 relative overflow-hidden shadow-lg">
+                        <div class="glass-panel p-5 rounded-2xl space-y-4 relative overflow-hidden">
                             <div id="channel-create-lock-overlay" class="hidden absolute inset-0 bg-darkCard/90 backdrop-blur-[3px] z-20 flex flex-col items-center justify-center text-center p-6">
                                 <div class="p-3 bg-gray-800/80 text-gray-400 rounded-2xl border border-gray-700/50 mb-3 shadow">
                                     <i data-lucide="lock" class="w-6 h-6"></i>
@@ -773,7 +830,51 @@
                             </button>
                         </div>
 
-                        <!-- Co-Pilot Voice Engine -->
+                        <!-- Active Channel Management List -->
+                        <div class="glass-panel p-5 rounded-2xl space-y-3">
+                            <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
+                                <i data-lucide="list-video" class="text-indigo-400 w-4.5 h-4.5"></i> Manage Workspace Channels
+                            </h4>
+                            <div class="space-y-2 max-h-48 overflow-y-auto pr-1" id="manage-channels-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: AI Co-Pilot Vocal Speech & Audio Settings -->
+                    <div class="space-y-6 font-sans">
+                        <!-- Real Hardware Audio Diagnostics Card -->
+                        <div class="glass-panel p-5 rounded-2xl space-y-4 shadow-lg border border-darkBorder/40">
+                            <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
+                                <i data-lucide="mic" class="text-indigo-400 w-4.5 h-4.5"></i> Mic Hardware Diagnostics
+                            </h4>
+                            <p class="text-xs text-gray-400 leading-relaxed">
+                                Configure your physical hardware devices and monitor live decibel spectrum levels before joining voice rooms.
+                            </p>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">Select Microphone Hardware</label>
+                                <select id="voice-input-device" onchange="switchMicrophoneDevice(this.value)" class="w-full bg-darkBg border border-darkBorder/60 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-white font-medium">
+                                    <option value="">Default Microphone</option>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                    <span>Signal Strength</span>
+                                    <span id="mic-db-indicator" class="font-mono text-emerald-400 font-bold">0 dB</span>
+                                </div>
+                                <div class="h-10 bg-darkBg/80 rounded-xl border border-darkBorder/60 overflow-hidden relative flex items-center px-1">
+                                    <canvas id="mic-level-canvas" class="w-full h-8 block"></canvas>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="toggleMicTest()" id="btn-toggle-mic-test" class="flex-grow bg-indigo-600/20 hover:bg-indigo-600/35 border border-indigo-500/30 text-indigo-400 font-bold text-xs py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-1.5">
+                                    <i data-lucide="play" class="w-3.5 h-3.5"></i> Test Microphone
+                                </button>
+                                <button onclick="enumerateMicDevices()" class="bg-gray-800/60 hover:bg-gray-700/80 border border-gray-700/30 text-gray-300 p-2.5 rounded-xl transition" title="Refresh Audio Hardware Devices">
+                                    <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Co-Pilot Voice Engine Settings -->
                         <div class="glass-panel p-5 rounded-2xl space-y-4 shadow-lg">
                             <div class="flex items-center justify-between">
                                 <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
@@ -782,7 +883,7 @@
                                 <span class="bg-indigo-950 text-indigo-400 border border-indigo-800/40 text-[9px] font-bold px-1.5 py-0.5 rounded font-mono">GEMINI TTS</span>
                             </div>
                             <p class="text-xs text-gray-400 leading-relaxed">
-                                Customize the vocal presence of your AI Risk Advisor. SyncPL integrates high-fidelity prebuilt voice profiles directly inside dynamic voice rooms.
+                                Customize the voice of your AI Risk Advisor. SyncPL integrates with Google's TTS engine to generate physical synthesized voices.
                             </p>
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">AI Voice Actor</label>
@@ -802,90 +903,30 @@
                                 <input type="text" id="tts-vocal-prompt" placeholder="Say critically like a strict risk analyst..." class="w-full bg-darkBg border border-darkBorder/60 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono" value="Speak critically like a strict hedge fund risk analyst">
                             </div>
 
+                            <!-- Push to Talk vs Continuous Selector -->
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider">Microphone Activation</label>
+                                <div class="flex items-center justify-between bg-darkBg/60 p-3 border border-darkBorder/40 rounded-xl">
+                                    <span class="text-xs text-gray-300 font-medium">Continuous Voice Detection</span>
+                                    <div class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="continuous-audio-toggle" checked class="sr-only peer">
+                                        <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Microphone Sensitivity Slider -->
+                            <div>
+                                <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">
+                                    <span>Mic Input Sensitivity</span>
+                                    <span id="mic-sens-percentage" class="font-mono">80%</span>
+                                </div>
+                                <input type="range" min="1" max="100" value="80" id="mic-sensitivity-slider" class="w-full accent-indigo-500 cursor-pointer h-1.5 bg-gray-800 rounded-lg appearance-none">
+                            </div>
+
                             <button onclick="triggerVoiceSpeakSim()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 px-4 rounded-xl transition flex items-center justify-center gap-1.5 shadow shadow-emerald-600/10 font-sans">
                                 <i data-lucide="volume-2" class="w-4.5 h-4.5"></i> Test Voice Co-Pilot
                             </button>
-                        </div>
-                    </div>
-
-                    <!-- Column 4: HARDWARE AND VOICE AUDIO SETTINGS -->
-                    <div class="space-y-6">
-                        <div class="glass-panel p-5 rounded-2xl space-y-4 shadow-lg">
-                            <div class="flex items-center justify-between">
-                                <h4 class="font-bold text-gray-100 text-sm flex items-center gap-2">
-                                    <i data-lucide="headphones" class="text-indigo-400 w-4.5 h-4.5"></i> Voice Desk Hardware
-                                </h4>
-                                <span class="bg-emerald-950 text-emerald-400 border border-emerald-800/40 text-[9px] font-bold px-1.5 py-0.5 rounded font-mono">HARDWARE</span>
-                            </div>
-                            <p class="text-xs text-gray-400 leading-relaxed font-sans">
-                                Select capture hardware, modify microphone sensitivity/boost levels, and monitor output signals.
-                            </p>
-
-                            <!-- Microphone Selector -->
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider font-semibold">Microphone Input</label>
-                                <select id="audio-input-device" onchange="handleInputDeviceChange()" class="w-full bg-darkBg border border-darkBorder/60 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-white font-medium">
-                                    <option value="">Default Microphone</option>
-                                </select>
-                            </div>
-
-                            <!-- Speaker Selector -->
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 tracking-wider font-semibold">Audio Output Speaker</label>
-                                <select id="audio-output-device" class="w-full bg-darkBg border border-darkBorder/60 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-white font-medium">
-                                    <option value="">Default Speakers/Headphones</option>
-                                </select>
-                            </div>
-
-                            <!-- Mic Boost Slider -->
-                            <div>
-                                <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">
-                                    <span>Microphone Gain (Boost)</span>
-                                    <span id="mic-boost-percentage" class="font-mono">100%</span>
-                                </div>
-                                <input type="range" min="0" max="200" value="100" id="mic-boost-slider" oninput="document.getElementById('mic-boost-percentage').innerText = this.value + '%'" class="w-full accent-indigo-500 cursor-pointer h-1.5 bg-gray-800 rounded-lg appearance-none">
-                            </div>
-
-                            <!-- Playback Volume Slider -->
-                            <div>
-                                <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">
-                                    <span>Voice Chat Volume</span>
-                                    <span id="master-vol-percentage" class="font-mono">90%</span>
-                                </div>
-                                <input type="range" min="0" max="100" value="90" id="master-output-volume-slider" oninput="document.getElementById('master-vol-percentage').innerText = this.value + '%'" class="w-full accent-indigo-500 cursor-pointer h-1.5 bg-gray-800 rounded-lg appearance-none">
-                            </div>
-
-                            <!-- Hardware Processing Filters -->
-                            <div class="grid grid-cols-2 gap-3 pt-1">
-                                <div class="bg-darkBg/60 p-2 border border-darkBorder/40 rounded-xl space-y-1">
-                                    <span class="block text-[8px] font-extrabold text-gray-500 uppercase">Echo Cancel</span>
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-[10px] text-gray-300 font-semibold">Active</span>
-                                        <input type="checkbox" id="echo-cancel-toggle" checked class="accent-indigo-500 rounded bg-gray-800 border-gray-700">
-                                    </div>
-                                </div>
-                                <div class="bg-darkBg/60 p-2 border border-darkBorder/40 rounded-xl space-y-1">
-                                    <span class="block text-[8px] font-extrabold text-gray-500 uppercase">Noise Filter</span>
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-[10px] text-gray-300 font-semibold">Enabled</span>
-                                        <input type="checkbox" id="noise-suppress-toggle" checked class="accent-indigo-500 rounded bg-gray-800 border-gray-700">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Mic Signal Monitor & Testing -->
-                            <div class="space-y-2 pt-2 border-t border-darkBorder/30">
-                                <div class="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                    <span>Live Signal Level</span>
-                                    <span class="text-indigo-400 font-mono text-[9px]">DECIBEL MONITOR</span>
-                                </div>
-                                <div class="w-full bg-gray-950 h-2.5 rounded-full border border-darkBorder/60 overflow-hidden relative">
-                                    <div id="test-mic-level-bar" class="bg-gradient-to-r from-emerald-500 via-indigo-500 to-pink-500 h-full w-[0%] rounded-full transition-all duration-75"></div>
-                                </div>
-                                <button type="button" id="btn-test-mic" onclick="toggleTestMicrophone()" class="w-full bg-indigo-600/15 hover:bg-indigo-600/30 border border-indigo-500/20 text-indigo-400 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm">
-                                    <i data-lucide="play" class="w-4 h-4"></i> Test Hardware Input
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -961,7 +1002,7 @@
             <input type="hidden" id="rename-target-id">
             <div>
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Current Channel Name</label>
-                <input type="text" id="rename-current-name" readonly class="w-full bg-darkBg/50 border border-darkBorder/40 rounded-xl px-4 py-2.5 text-sm text-gray-500 font-semibold cursor-not-allowed font-mono">
+                <input type="text" id="rename-current-name" readonly class="w-full bg-darkBg/50 border border-darkBorder/40 rounded-xl px-4 py-2.5 text-sm text-gray-500 font-semibold cursor-not-allowed">
             </div>
             <div>
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">New Channel Name</label>
@@ -1056,7 +1097,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // Application Configuration - Synchronized with live database credentials
@@ -1128,17 +1169,16 @@
     let activeChatChannelType = "text"; 
     let newChannelTypeSelection = "text"; // text or voice
 
-    // Voice hardware & signal configurations
+    // Voice & Hardware Config Variables
     let isMuted = false;
     let isDeafened = false;
     let activeVoiceChannel = null; 
     let userMediaStream = null;
-    
-    // Audio Testing Node Registry
-    let testMicStream = null;
-    let testMicAnalyser = null;
-    let testMicCtx = null;
-    let testMicAnimationFrame = null;
+    let isTestingMic = false;
+    let micTestStream = null;
+    let micTestAudioCtx = null;
+    let micTestAnalyser = null;
+    let micTestAnimationId = null;
 
     // Audio elements & speech synthesis playing
     let isAiSpeaking = false;
@@ -1150,7 +1190,6 @@
     // Synchronizer tones
     function playVoiceRoomSound(type) {
         try {
-            const masterVol = parseFloat(document.getElementById('master-output-volume-slider')?.value || 90) / 100;
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
             const ctx = new AudioContext();
@@ -1161,7 +1200,7 @@
                 const gain1 = ctx.createGain();
                 osc1.type = 'sine';
                 osc1.frequency.setValueAtTime(523.25, now);
-                gain1.gain.setValueAtTime(0.08 * masterVol, now);
+                gain1.gain.setValueAtTime(0.08, now);
                 gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
                 osc1.connect(gain1);
                 gain1.connect(ctx.destination);
@@ -1172,7 +1211,7 @@
                 const gain2 = ctx.createGain();
                 osc2.type = 'sine';
                 osc2.frequency.setValueAtTime(659.25, now + 0.08);
-                gain2.gain.setValueAtTime(0.08 * masterVol, now + 0.08);
+                gain2.gain.setValueAtTime(0.08, now + 0.08);
                 gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
                 osc2.connect(gain2);
                 gain2.connect(ctx.destination);
@@ -1183,7 +1222,7 @@
                 const gain1 = ctx.createGain();
                 osc1.type = 'sine';
                 osc1.frequency.setValueAtTime(659.25, now);
-                gain1.gain.setValueAtTime(0.06 * masterVol, now);
+                gain1.gain.setValueAtTime(0.06, now);
                 gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
                 osc1.connect(gain1);
                 gain1.connect(ctx.destination);
@@ -1194,7 +1233,7 @@
                 const gain2 = ctx.createGain();
                 osc2.type = 'sine';
                 osc2.frequency.setValueAtTime(523.25, now + 0.08);
-                gain2.gain.setValueAtTime(0.06 * masterVol, now + 0.08);
+                gain2.gain.setValueAtTime(0.06, now + 0.08);
                 gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
                 osc2.connect(gain2);
                 gain2.connect(ctx.destination);
@@ -1212,13 +1251,10 @@
         initDefaultInputs();
         setupInputSliders();
         initLiveTickerTape(); 
-        await populateAudioDevices();
         
-        // Listen for system hardware device swaps
-        if (navigator.mediaDevices && typeof navigator.mediaDevices.addEventListener === 'function') {
-            navigator.mediaDevices.addEventListener('devicechange', populateAudioDevices);
-        }
-
+        // Populate local audio input hardware select boxes instantly
+        await enumerateMicDevices();
+        
         // Dynamic Safety Timeout to prevent infinite loading screens
         setTimeout(() => {
             const loader = document.getElementById('loading-overlay');
@@ -1245,163 +1281,318 @@
         }
     }
 
-    // Capture & Populate Connected Audio Hardware Options
-    async function populateAudioDevices() {
-        const inputSelect = document.getElementById('audio-input-device');
-        const outputSelect = document.getElementById('audio-output-device');
-        if (!inputSelect || !outputSelect) return;
-
+    // Hardware microphone finder
+    async function enumerateMicDevices() {
         try {
-            // Quietly trigger authorization handshake to ensure we get custom labeled devices
-            if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
-                await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => {});
-            }
+            const settingsSelect = document.getElementById('voice-input-device');
+            const chatSelect = document.getElementById('voice-input-device-chat');
             
+            if (!settingsSelect && !chatSelect) return;
+
+            // Trigger prompt to fetch device labels safely
+            try {
+                const tempStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                tempStream.getTracks().forEach(track => track.stop());
+            } catch (err) {
+                console.warn("Mic permissions not approved yet. Generic device IDs fallback loaded.");
+            }
+
             const devices = await navigator.mediaDevices.enumerateDevices();
-            
-            inputSelect.innerHTML = '';
-            outputSelect.innerHTML = '';
+            const audioInputs = devices.filter(d => d.kind === 'audioinput');
 
-            let inputs = devices.filter(d => d.kind === 'audioinput');
-            let outputs = devices.filter(d => d.kind === 'audiooutput');
-
-            if (inputs.length === 0) {
-                inputSelect.innerHTML = `<option value="">System Default Microphone</option>`;
-            } else {
-                inputs.forEach(device => {
-                    inputSelect.innerHTML += `<option value="${device.deviceId}">${escapeHTML(device.label) || 'Input Microphone (' + device.deviceId.substring(0, 5) + ')'}</option>`;
+            const populateBox = (selectEl) => {
+                if (!selectEl) return;
+                selectEl.innerHTML = '<option value="">Default Microphone</option>';
+                audioInputs.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Microphone (${device.deviceId.substring(0, 5)})`;
+                    selectEl.appendChild(option);
                 });
-            }
+            };
 
-            if (outputs.length === 0) {
-                outputSelect.innerHTML = `<option value="">System Default Speaker</option>`;
-            } else {
-                outputs.forEach(device => {
-                    outputSelect.innerHTML += `<option value="${device.deviceId}">${escapeHTML(device.label) || 'Output Speaker (' + device.deviceId.substring(0, 5) + ')'}</option>`;
-                });
-            }
+            populateBox(settingsSelect);
+            populateBox(chatSelect);
         } catch (e) {
-            console.warn("Unable to enumerate audio devices: ", e);
-            inputSelect.innerHTML = `<option value="">System Default Microphone</option>`;
-            outputSelect.innerHTML = `<option value="">System Default Speaker</option>`;
+            console.error("Hardware query exception: ", e);
         }
     }
 
-    // Dynamic Live Hardware Level Visualizer & Analyser
-    window.toggleTestMicrophone = async function() {
-        const testBtn = document.getElementById('btn-test-mic');
-        const testBar = document.getElementById('test-mic-level-bar');
-        if (!testBtn || !testBar) return;
+    // Switch input source mid-session
+    window.switchMicrophoneDevice = async function(deviceId) {
+        // Sync selectors
+        const settingsSelect = document.getElementById('voice-input-device');
+        const chatSelect = document.getElementById('voice-input-device-chat');
+        if (settingsSelect) settingsSelect.value = deviceId;
+        if (chatSelect) chatSelect.value = deviceId;
 
-        if (testMicStream) {
-            stopMicTest();
-            testBtn.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i> Test Hardware Input`;
-            testBtn.className = "w-full bg-indigo-600/15 hover:bg-indigo-600/30 border border-indigo-500/20 text-indigo-400 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm";
-            lucide.createIcons();
-            testBar.style.width = '0%';
+        if (isTestingMic) {
+            // Restart testing loop on new device
+            stopMicTesting();
+            await startMicTesting();
+        }
+
+        if (activeVoiceChannel) {
+            showToast("Mic Input Changed", "Updating audio capture hardware pipeline...", "info");
+            // Reconnect WebRTC capturing stream
+            await disconnectVoice();
+            await toggleVoiceRoom(activeVoiceChannel);
+        }
+    };
+
+    // Live decibel monitor loop
+    window.toggleMicTest = async function() {
+        const btn = document.getElementById('btn-toggle-mic-test');
+        if (!btn) return;
+
+        if (isTestingMic) {
+            stopMicTesting();
+            btn.className = "flex-grow bg-indigo-600/20 hover:bg-indigo-600/35 border border-indigo-500/30 text-indigo-400 font-bold text-xs py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-1.5";
+            btn.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5"></i> Test Microphone`;
+            isTestingMic = false;
+            showToast("Mic Test Stopped", "Local diagnostic loop offline.", "info");
+        } else {
+            isTestingMic = true;
+            btn.className = "flex-grow bg-rose-600/20 hover:bg-rose-600/35 border border-rose-500/30 text-rose-400 font-bold text-xs py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-1.5 animate-pulse";
+            btn.innerHTML = `<i data-lucide="square" class="w-3.5 h-3.5"></i> Stop Testing`;
+            showToast("Mic Test Started", "Verify your signal strength via the visualizer canvas below.", "success");
+            await startMicTesting();
+        }
+        lucide.createIcons();
+    };
+
+    async function startMicTesting() {
+        try {
+            const deviceId = document.getElementById('voice-input-device')?.value || '';
+            const constraints = {
+                audio: deviceId ? { deviceId: { exact: deviceId } } : true
+            };
+
+            micTestStream = await navigator.mediaDevices.getUserMedia(constraints);
+            
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            micTestAudioCtx = new AudioContext();
+            
+            const source = micTestAudioCtx.createMediaStreamSource(micTestStream);
+            micTestAnalyser = micTestAudioCtx.createAnalyser();
+            micTestAnalyser.fftSize = 256;
+            
+            source.connect(micTestAnalyser);
+            
+            const canvas = document.getElementById('mic-level-canvas');
+            const dbIndicator = document.getElementById('mic-db-indicator');
+            if (!canvas) return;
+
+            const canvasCtx = canvas.getContext('2d');
+            const bufferLength = micTestAnalyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                if (!isTestingMic) return;
+                micTestAnimationId = requestAnimationFrame(draw);
+                
+                micTestAnalyser.getByteFrequencyData(dataArray);
+                
+                // Calculate average decibels
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / bufferLength;
+                const dbValue = Math.round(average);
+                if (dbIndicator) dbIndicator.innerText = `${dbValue} dB`;
+
+                canvasCtx.fillStyle = '#060913';
+                canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Plot visual feedback wave spectrum
+                const barWidth = (canvas.width / bufferLength) * 1.5;
+                let barHeight;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    barHeight = dataArray[i] / 4; 
+                    const greenVal = Math.min(255, 120 + barHeight * 3);
+                    const blueVal = Math.max(0, 200 - barHeight * 4);
+                    canvasCtx.fillStyle = `rgb(16, ${greenVal}, ${blueVal})`;
+                    
+                    const y = (canvas.height - barHeight) / 2;
+                    canvasCtx.fillRect(x, y, barWidth, barHeight);
+                    
+                    x += barWidth + 1.5;
+                }
+            }
+            draw();
+        } catch (e) {
+            console.error("Local microphone diagnostics failed:", e);
+            showToast("Hardware Blocked", "Please verify mic permissions on your browser.", "error");
+            isTestingMic = false;
+            const btn = document.getElementById('btn-toggle-mic-test');
+            if (btn) {
+                btn.className = "flex-grow bg-indigo-600/20 hover:bg-indigo-600/35 border border-indigo-500/30 text-indigo-400 font-bold text-xs py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-1.5";
+                btn.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5"></i> Test Microphone`;
+                lucide.createIcons();
+            }
+        }
+    }
+
+    function stopMicTesting() {
+        if (micTestAnimationId) {
+            cancelAnimationFrame(micTestAnimationId);
+            micTestAnimationId = null;
+        }
+        if (micTestStream) {
+            micTestStream.getTracks().forEach(t => t.stop());
+            micTestStream = null;
+        }
+        if (micTestAudioCtx) {
+            micTestAudioCtx.close();
+            micTestAudioCtx = null;
+        }
+        const dbIndicator = document.getElementById('mic-db-indicator');
+        if (dbIndicator) dbIndicator.innerText = '0 dB';
+        
+        const canvas = document.getElementById('mic-level-canvas');
+        if (canvas) {
+            const canvasCtx = canvas.getContext('2d');
+            canvasCtx.fillStyle = '#060913';
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+
+    // Authentication Sequence & State Listener (RULE 3)
+    async function initApplicationAuth() {
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await initSyncAndUserDoc();
+            } else {
+                currentUser = null;
+                // Safely purge prior active streams on clean state logouts
+                if (syncListenerUnsubscribe) syncListenerUnsubscribe();
+                if (entriesListenerUnsubscribe) entriesListenerUnsubscribe();
+                if (chatListenerUnsubscribe) chatListenerUnsubscribe();
+                if (voiceUsersListenerUnsubscribe) voiceUsersListenerUnsubscribe();
+                if (channelsListenerUnsubscribe) channelsListenerUnsubscribe();
+                if (roomMetadataListenerUnsubscribe) roomMetadataListenerUnsubscribe();
+
+                userGroupId = "";
+                localUsername = "Trader";
+                updateDisplayValues();
+                showMainMenu();
+                hideLoader();
+            }
+        });
+    }
+
+    // Authentication Switching Panels
+    window.setAuthTab = function(type) {
+        const tabs = ['guest', 'login', 'register'];
+        tabs.forEach(t => {
+            const panel = document.getElementById(`auth-panel-${t}`);
+            const btn = document.getElementById(`tab-auth-${t}`);
+            if (panel) {
+                if (t === type) panel.classList.remove('hidden');
+                else panel.classList.add('hidden');
+            }
+            if (btn) {
+                if (t === type) {
+                    btn.className = "flex-grow py-2 rounded-lg text-xs font-bold text-indigo-400 bg-indigo-600/10 transition";
+                } else {
+                    btn.className = "flex-grow py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition";
+                }
+            }
+        });
+    };
+
+    // Anonymous auth skipping triggers
+    window.triggerGuestAuth = async function() {
+        const usernameField = document.getElementById('guest-username-input');
+        const usernameVal = usernameField.value.trim() || `Trader_${Math.random().toString(36).substring(2, 7)}`;
+        
+        showLoader();
+        localUsername = usernameVal;
+
+        try {
+            await signInAnonymously(auth);
+            // onAuthStateChanged handler will trigger post-sign in user summary writes automatically
+            document.getElementById('auth-group-panels').classList.remove('hidden');
+            showToast("Guest Connected", "Session configured. Select or join a sync room below.", "success");
+        } catch (e) {
+            console.error("Guest authentication fail: ", e);
+            showToast("Auth Issue", "Anonymous gateway disabled.", "error");
+        } finally {
+            hideLoader();
+        }
+    };
+
+    // Permanent profile login routines
+    window.handleEmailLogin = async function(event) {
+        event.preventDefault();
+        showLoader();
+
+        const email = document.getElementById('login-email-input').value.trim();
+        const password = document.getElementById('login-password-input').value;
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            document.getElementById('auth-group-panels').classList.remove('hidden');
+            showToast("Welcome Back!", "Identity authenticated successfully. Connect your room below.", "success");
+        } catch (error) {
+            console.error("Login failure: ", error);
+            showToast("Login Failed", "Incorrect credentials or account not found.", "error");
+        } finally {
+            hideLoader();
+        }
+    };
+
+    // New profile registration routines
+    window.handleEmailRegister = async function(event) {
+        event.preventDefault();
+        showLoader();
+
+        const alias = document.getElementById('register-username-input').value.trim();
+        const email = document.getElementById('register-email-input').value.trim();
+        const password = document.getElementById('register-password-input').value;
+
+        if (password.length < 6) {
+            showToast("Invalid Password", "Passwords must be at least 6 characters.", "error");
+            hideLoader();
             return;
         }
 
         try {
-            const selectVal = document.getElementById('audio-input-device').value;
-            const useEcho = document.getElementById('echo-cancel-toggle').checked;
-            const useNoise = document.getElementById('noise-suppress-toggle').checked;
-
-            const constraints = {
-                audio: {
-                    deviceId: selectVal ? { exact: selectVal } : undefined,
-                    echoCancellation: useEcho,
-                    noiseSuppression: useNoise
-                }
-            };
-
-            testMicStream = await navigator.mediaDevices.getUserMedia(constraints);
-            
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            testMicCtx = new AudioContext();
-            const source = testMicCtx.createMediaStreamSource(testMicStream);
-            testMicAnalyser = testMicCtx.createAnalyser();
-            testMicAnalyser.fftSize = 256;
-            source.connect(testMicAnalyser);
-
-            testBtn.innerHTML = `<i data-lucide="square" class="w-4 h-4"></i> Stop Hardware Test`;
-            testBtn.className = "w-full bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 text-rose-400 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm";
-            lucide.createIcons();
-
-            const bufferLength = testMicAnalyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-
-            function drawMeter() {
-                if (!testMicStream) return;
-                testMicAnalyser.getByteFrequencyData(dataArray);
-                let total = 0;
-                for (let i = 0; i < bufferLength; i++) {
-                    total += dataArray[i];
-                }
-                const average = total / bufferLength;
-                
-                // Incorporate selected Microphone Gain Boost Slider level
-                const boostVal = parseFloat(document.getElementById('mic-boost-slider')?.value || 100) / 100;
-                let level = (average / 128) * 100 * boostVal;
-                if (level > 100) level = 100;
-
-                testBar.style.width = `${level}%`;
-                testMicAnimationFrame = requestAnimationFrame(drawMeter);
-            }
-            drawMeter();
-            showToast("Microphone Capture Active", "Speak into your mic to calibrate voice levels.", "success");
-
-        } catch (err) {
-            console.error("Mic calibration sequence failed:", err);
-            showToast("Hardware Connection Blocked", "Grant hardware microphonic permission inside browser settings.", "error");
-        }
-    };
-
-    function stopMicTest() {
-        if (testMicAnimationFrame) cancelAnimationFrame(testMicAnimationFrame);
-        if (testMicStream) {
-            testMicStream.getTracks().forEach(track => track.stop());
-            testMicStream = null;
-        }
-        if (testMicCtx) {
-            testMicCtx.close().catch(() => {});
-            testMicCtx = null;
-        }
-        const testBar = document.getElementById('test-mic-level-bar');
-        if (testBar) testBar.style.width = '0%';
-    }
-
-    window.handleInputDeviceChange = function() {
-        stopMicTest();
-        const testBtn = document.getElementById('btn-test-mic');
-        if (testBtn) {
-            testBtn.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i> Test Hardware Input`;
-            testBtn.className = "w-full bg-indigo-600/15 hover:bg-indigo-600/30 border border-indigo-500/20 text-indigo-400 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm";
-            lucide.createIcons();
-        }
-        if (activeVoiceChannel) {
-            showToast("Microphone Hot Swap", "Reconnecting to active Voice Desk with new device constraints...", "info");
-            toggleVoiceRoom(activeVoiceChannel); // Trigger device constraints toggle
-        }
-    };
-
-    // Authentication Sequence (RULE 3)
-    async function initApplicationAuth() {
-        try {
-            let userCredential;
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                userCredential = await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                userCredential = await signInAnonymously(auth);
-            }
-            currentUser = userCredential.user;
-            await initSyncAndUserDoc();
+            localUsername = alias;
+            await createUserWithEmailAndPassword(auth, email, password);
+            document.getElementById('auth-group-panels').classList.remove('hidden');
+            showToast("Account Created", "Your profile is saved. Select or join a room below.", "success");
         } catch (error) {
-            console.error("Auth Exception:", error);
-            showToast("Sync offline", "Fallback local mode started.", "error");
+            console.error("Registration fail: ", error);
+            showToast("Registration Failed", error.message || "Could not register account.", "error");
+        } finally {
             hideLoader();
         }
-    }
+    };
+
+    // Terminate secure context
+    window.triggerLogout = async function() {
+        showCustomConfirm(
+            "Log Out Profile", 
+            "Are you sure you want to disconnect? You will be signed out from your multi-device synchronization nodes.", 
+            async () => {
+                showLoader();
+                try {
+                    await disconnectVoice();
+                    await signOut(auth);
+                    showToast("Signed Out", "Safe session terminated.", "info");
+                } catch (e) {
+                    console.error("Log out sequence failed: ", e);
+                } finally {
+                    hideLoader();
+                }
+            }
+        );
+    };
 
     async function initSyncAndUserDoc() {
         if (!currentUser) {
@@ -1423,7 +1614,7 @@
                 userAvatarType = userProfile.avatarType || "emoji";
                 userAvatarVal = userProfile.avatarVal || "🐂";
             } else {
-                localUsername = `Trader_${currentUser.uid.substring(0, 5)}`;
+                localUsername = localUsername !== "Anonymous" ? localUsername : `Trader_${currentUser.uid.substring(0, 5)}`;
                 userGroupId = ""; 
                 userAvatarColor = "indigo";
                 userAvatarType = "emoji";
@@ -1450,19 +1641,22 @@
             hideMainMenu();
             await initFirestoreDataListeners();
         } else {
+            // Retain user registration inputs, but display joining rooms wrapper
+            document.getElementById('auth-group-panels').classList.remove('hidden');
             showMainMenu();
             hideLoader();
         }
     }
 
     function showMainMenu() {
-        // FIXED LAYOUT OVERLAP: Hide #app entirely when Welcome is active
+        // FIXED LAYOUT OVERLAP ({E44CF6D8-9765-45C2-B554-5117EDEDFBC7}.png): Hide #app entirely when Welcome is active!
         const menu = document.getElementById('main-menu-overlay');
         const mainApp = document.getElementById('app');
         if (menu) menu.classList.remove('hidden');
         if (mainApp) mainApp.classList.add('hidden');
-        const usernameInput = document.getElementById('menu-username-input');
-        if (usernameInput) usernameInput.value = localUsername;
+        
+        const guestInput = document.getElementById('guest-username-input');
+        if (guestInput) guestInput.value = localUsername;
     }
 
     function hideMainMenu() {
@@ -1519,6 +1713,12 @@
 
         const settingsUsernameInput = document.getElementById('settings-username-input');
         if (settingsUsernameInput) settingsUsernameInput.value = localUsername;
+
+        // Display login type
+        const authLbl = document.getElementById('user-status-auth-lbl');
+        if (authLbl && currentUser) {
+            authLbl.innerText = currentUser.isAnonymous ? "Guest Synchronizer" : (currentUser.email || "Trader Secure");
+        }
 
         document.querySelectorAll('#profile-color-selector button').forEach(btn => {
             btn.classList.remove('border-white', 'ring-2');
@@ -1683,7 +1883,7 @@
 
             // 6. Shared Voice connections
             const voiceQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'voice_users'));
-            isFirstVoiceLoad = false; 
+            isFirstVoiceLoad = true; 
 
             voiceUsersListenerUnsubscribe = onSnapshot(voiceQuery, (snapshot) => {
                 const previousVoiceUsersMap = {};
@@ -2005,6 +2205,7 @@
         }
     };
 
+    // restored robust deleteCustomChannel function
     window.deleteCustomChannel = async function(docId, name) {
         const isAdmin = currentUser && roomAdminId === currentUser.uid;
         const isMod = currentUser && roomMods.includes(currentUser.uid);
@@ -2451,17 +2652,6 @@
                 const audioUrl = URL.createObjectURL(wavBlob);
 
                 currentSpeechAudio = new Audio(audioUrl);
-                
-                // Set synthesis playback volume using hardware volume configurations
-                const masterVolVal = parseFloat(document.getElementById('master-output-volume-slider')?.value || 90) / 100;
-                currentSpeechAudio.volume = masterVolVal;
-
-                // Support outputs selection (setSinkId) if browser supported
-                const activeOutputId = document.getElementById('audio-output-device').value;
-                if (activeOutputId && typeof currentSpeechAudio.setSinkId === 'function') {
-                    await currentSpeechAudio.setSinkId(activeOutputId).catch(() => {});
-                }
-
                 currentSpeechAudio.play();
                 
                 currentSpeechAudio.onended = () => {
@@ -2692,12 +2882,12 @@
                     <span class="text-sm font-semibold text-gray-300">${escapeHTML(log.username)}</span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold uppercase bg-indigo-950/40 text-indigo-400 border border-indigo-800/20 font-mono">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold uppercase bg-indigo-950/40 text-indigo-400 border border-indigo-800/20">
                         ${escapeHTML(log.asset)}
                     </span>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-400 max-w-xs truncate" title="${escapeHTML(log.notes)}">
-                    ${escapeHTML(log.notes) || '<span class="text-gray-600 italic font-sans">No description</span>'}
+                    ${escapeHTML(log.notes) || '<span class="text-gray-600 italic">No description</span>'}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold">
                     <span class="${isProfit ? 'text-emerald-400' : 'text-rose-500'}">
@@ -3049,22 +3239,12 @@
 
     async function joinWebRtcVoiceRoom(roomName) {
         try {
-            const selectVal = document.getElementById('audio-input-device').value;
-            const useEcho = document.getElementById('echo-cancel-toggle').checked;
-            const useNoise = document.getElementById('noise-suppress-toggle').checked;
-
             try {
-                if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
-                    userMediaStream = await navigator.mediaDevices.getUserMedia({
-                        audio: { 
-                            deviceId: selectVal ? { exact: selectVal } : undefined,
-                            echoCancellation: useEcho,
-                            noiseSuppression: useNoise
-                        }
-                    });
-                }
+                userMediaStream = await navigator.mediaDevices.getUserMedia({
+                    audio: { echoCancellation: true, noiseSuppression: true }
+                });
             } catch (mediaError) {
-                console.warn("Media capture blocked, using simulated visual indicators");
+                console.warn("Iframe mic error: using simulated signals");
             }
 
             const voiceUserDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'voice_users', currentUser.uid);
@@ -3171,7 +3351,7 @@
         const roomPeers = voiceUsers.filter(v => v.channel === activeVoiceChannel);
 
         if (roomPeers.length === 0) {
-            listContainer.innerHTML = `<p class="text-[10px] text-gray-500 italic font-sans">No participants connected</p>`;
+            listContainer.innerHTML = `<p class="text-[10px] text-gray-500 italic">No participants connected</p>`;
             return;
         }
 
@@ -3395,28 +3575,6 @@
         if (activeBtn) activeBtn.classList.add('border-white', 'ring-2');
     };
 
-    window.setAvatarType = function(type) {
-        userAvatarType = type;
-        if (type === 'emoji') {
-            userAvatarVal = "🐂";
-        } else {
-            userAvatarVal = document.getElementById('pfp-custom-url-input')?.value || "";
-        }
-        updateDisplayValues();
-    };
-
-    window.setAvatarVal = function(val) {
-        userAvatarVal = val;
-        updateDisplayValues();
-    };
-
-    window.setAvatarValFromUrlInput = function() {
-        const input = document.getElementById('pfp-custom-url-input');
-        if (input && userAvatarType === 'url') {
-            userAvatarVal = input.value.trim();
-        }
-    };
-
     window.saveWorkspaceProfile = async function() {
         const usernameField = document.getElementById('settings-username-input');
         const usernameVal = usernameField.value.trim();
@@ -3446,11 +3604,8 @@
     };
 
     window.triggerMainMenuCreate = async function() {
-        const usernameField = document.getElementById('menu-username-input');
-        const usernameVal = usernameField.value.trim() || `Trader_${currentUser.uid.substring(0, 5)}`;
-        
+        if (!currentUser) return;
         showLoader();
-        localUsername = usernameVal;
         const newCode = generateRandomRoomCode();
         userGroupId = newCode;
 
@@ -3486,6 +3641,7 @@
     };
 
     window.triggerMainMenuJoin = async function() {
+        if (!currentUser) return;
         const codeInput = document.getElementById('menu-join-input');
         const rawCode = codeInput.value.trim().toUpperCase();
         if (!rawCode) {
@@ -3493,11 +3649,7 @@
             return;
         }
 
-        const usernameField = document.getElementById('menu-username-input');
-        const usernameVal = usernameField.value.trim() || `Trader_${currentUser.uid.substring(0, 5)}`;
-
         showLoader();
-        localUsername = usernameVal;
         userGroupId = rawCode;
 
         try {
@@ -3603,15 +3755,10 @@
         }
     };
 
-    // Navigation and tabs switcher
+    // Navigation and tabs switcher (Safely bound to window once at bottom)
     window.switchTab = function(tabName) {
         currentActiveTab = tabName;
         
-        // Stop dynamic calibrator/mic test if user navigates away from settings tab
-        if (tabName !== 'partners') {
-            stopMicTest();
-        }
-
         const views = ['dashboard', 'chat', 'leaderboard', 'logs', 'partners'];
         views.forEach(v => {
             const el = document.getElementById(`view-${v}`);
@@ -3670,7 +3817,6 @@
             const btn = document.getElementById('btn-partners');
             if (btn) btn.className = "nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 bg-indigo-600/15 text-indigo-400 border border-indigo-500/10";
             title = "Workspace Customizer & System Settings";
-            populateAudioDevices(); // Enumerate device elements immediately on Settings open
         }
 
         const titleEl = document.getElementById('current-view-title');
